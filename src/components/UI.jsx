@@ -5,6 +5,7 @@ import { playingClipAtom, videoControllerAtom, videoStatusAtom } from "./HostedV
 import { BOOK_SHEETS, getSpreadProject, getSpreadVideo, isBookOpen, projects } from "./page-content";
 
 export const pageAtom = atom(0);
+export const playbackPageAtom = atom(0);
 export const pages = Array.from({ length: BOOK_SHEETS }, (_, number) => ({
   front: number === 0 ? "book-cover" : "video-test-poster",
   back: number === BOOK_SHEETS - 1 ? "book-back" : "video-test-poster",
@@ -12,9 +13,10 @@ export const pages = Array.from({ length: BOOK_SHEETS }, (_, number) => ({
 
 export const UI = () => {
   const [page, setPage] = useAtom(pageAtom);
+  const playbackPage = useAtomValue(playbackPageAtom);
   const status = useAtomValue(videoStatusAtom);
-  const clip = getSpreadVideo(page);
-  const project = getSpreadProject(page);
+  const clip = getSpreadVideo(playbackPage);
+  const project = getSpreadProject(playbackPage);
   const controller = useAtomValue(videoControllerAtom);
   const playingClip = useAtomValue(playingClipAtom);
   const currentClip = playingClip?.spreadId === clip.id ? playingClip : clip;
@@ -38,21 +40,30 @@ export const UI = () => {
 
   return (
     <main className="book-ui pointer-events-none select-none fixed inset-0 z-10 flex justify-end flex-col">
-      <div className="video-controls pointer-events-auto" aria-label="Book controls">
-        <button type="button" aria-label="Previous page" disabled={page === 0} onClick={() => setPage(value => Math.max(0, value - 1))}>← Previous</button>
-        {isBookOpen(page, pages.length) && (
-          <>
-            <span role="status">{status === "loading" ? "Loading video…" : status === "error" ? "Video unavailable" : status === "placeholder" ? "Star preview" : currentClip.label}</span>
-            <button type="button" disabled={!controller || status === "loading" || status === "error"} onClick={() => controller?.toggle()}>
-              {(status === "playing" || status === "placeholder") ? "Pause" : "Play"}
-            </button>
-            {(status === "error" || status === "paused" || status === "placeholder") && <button type="button" onClick={() => controller?.retry()}>Retry</button>}
-            {project?.href && <a className="site-link" href={project.href} target="_blank" rel="noopener noreferrer">Open website ↗</a>}
-          </>
-        )}
-        <button type="button" aria-label="Next page" disabled={page === pages.length} onClick={() => setPage(value => Math.min(pages.length, value + 1))}>Next →</button>
+      <div className="book-toolbar pointer-events-auto" aria-label="Book navigation">
+        <details className="book-controls" onKeyDown={event => { if (event.key === "Escape") event.currentTarget.open = false; }}>
+          <summary>Controls</summary>
+          <div className="book-controls-panel">
+            {isBookOpen(playbackPage, pages.length) && <span role="status">{status === "loading" ? "Loading video…" : status === "error" ? "Video unavailable" : status === "placeholder" ? "Star preview" : currentClip.label}</span>}
+            <button type="button" aria-label="Previous page" disabled={page === 0} onClick={() => setPage(value => Math.max(0, value - 1))}>← Previous</button>
+            <button type="button" aria-label="Next page" disabled={page === pages.length} onClick={() => setPage(value => Math.min(pages.length, value + 1))}>Next →</button>
+            {isBookOpen(playbackPage, pages.length) && (
+              <>
+                <button type="button" disabled={!controller || status === "loading" || status === "error"} onClick={() => controller?.toggle()}>
+                  {(status === "playing" || status === "placeholder") ? "Pause" : "Play"}
+                </button>
+                {(status === "error" || status === "paused" || status === "placeholder") && <button type="button" onClick={() => controller?.retry()}>Retry</button>}
+                {project?.href && <a className="site-link" href={project.href} target="_blank" rel="noopener noreferrer">Open website ↗</a>}
+              </>
+            )}
+          </div>
+        </details>
+        <select className="book-page-select" aria-label="Choose a page" value={page} onChange={event => setPage(Number(event.target.value))}>
+          {pages.map((_, index) => <option key={index} value={index}>{index === 0 ? "Cover" : index === pages.length - 1 ? "Index" : "Page " + index}</option>)}
+          <option value={pages.length}>Back cover</option>
+        </select>
       </div>
-      {page === pages.length - 1 && (
+      {playbackPage === pages.length - 1 && (
         <aside className="project-index pointer-events-auto" aria-label="Project index">
           <span className="index-label">THE INDEX</span>
           {projects.map((project, index) => (
@@ -62,20 +73,7 @@ export const UI = () => {
           ))}
         </aside>
       )}
-      <nav className="w-full overflow-auto pointer-events-auto flex justify-center" aria-label="Book pages">
-        <div className="overflow-auto flex items-center gap-4 max-w-full p-10">
-          {[...pages].map((_, index) => (
-            <button type="button" key={index} aria-current={index === page ? "page" : undefined}
-              className={`border-transparent hover:border-white transition-all duration-300 px-4 py-3 rounded-full text-lg uppercase shrink-0 border ${index === page ? "bg-white/90 text-black" : "bg-black/30 text-white"}`}
-              onClick={() => setPage(index)}>
-              {index === 0 ? "Cover" : index === pages.length - 1 ? "Index" : `Page ${index}`}
-            </button>
-          ))}
-          <button type="button" aria-current={page === pages.length ? "page" : undefined}
-            className={`border-transparent hover:border-white transition-all duration-300 px-4 py-3 rounded-full text-lg uppercase shrink-0 border ${page === pages.length ? "bg-white/90 text-black" : "bg-black/30 text-white"}`}
-            onClick={() => setPage(pages.length)}>Back Cover</button>
-        </div>
-      </nav>
+
     </main>
   );
 };

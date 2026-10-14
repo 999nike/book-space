@@ -17,12 +17,6 @@ body {
   -webkit-text-stroke: 1px white;
 }
 
-.video-controls { position: absolute; top: auto; bottom: 148px; left: 50%; right: auto; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; color: #fff; font: 12px Poppins, sans-serif; padding: 10px 14px; border: 1px solid #ffffff26; border-radius: 12px; background: #141224aa; backdrop-filter: blur(12px); }
-.video-controls button, .video-controls a { padding: 7px 10px; border: 1px solid #ffffff33; border-radius: 7px; color: #fff; background: #ffffff0d; text-decoration: none; cursor: pointer; }
-.video-controls button:disabled { opacity: .45; cursor: default; }
-.video-controls button:focus-visible, .video-controls a:focus-visible { outline: 2px solid #b8a5ff; outline-offset: 3px; }
-@media (max-width: 600px) { .video-controls { top: auto; bottom: 90px; right: auto; left: 50%; font-size: 10px; justify-content: center; flex-wrap: wrap; } .book-ui nav > div { gap: 8px; padding: 20px 12px; } .book-ui nav button { font-size: 11px; padding: 10px 13px; } }
-
 .project-index { position: absolute; top: 90px; right: 24px; width: 240px; padding: 16px; border: 1px solid #ffffff26; border-radius: 12px; background: #141224e8; backdrop-filter: blur(12px); color: white; font: 12px Poppins, sans-serif; }
 .index-label { display: block; color: #c5b5ff; font-size: 10px; letter-spacing: .18em; margin-bottom: 8px; }
 .project-index a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid #ffffff20; color: white; text-decoration: none; }
@@ -30,6 +24,20 @@ body {
 .project-index a:focus-visible { outline: 2px solid #b8a5ff; outline-offset: 3px; }
 @media (max-width: 600px) { .project-index { top: 112px; right: 16px; width: 190px; padding: 12px; } .project-index a { padding: 9px 0; } }
 
-.video-controls .site-link { background: #c5b5ff; color: #151027; border-color: #c5b5ff; font-weight: 600; }
-@media (max-width: 600px) { .video-controls [role="status"] { flex-basis: 100%; text-align: center; } }
 
+.book-toolbar { position: absolute; bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; padding: 5px; max-width: calc(100vw - 24px); border: 1px solid #ffffff20; border-radius: 12px; background: #141224bb; backdrop-filter: blur(12px); color: #eee9ff; font: 12px Poppins, sans-serif; opacity: .85; }
+.book-toolbar:hover, .book-toolbar:focus-within { opacity: 1; }
+.book-controls { position: relative; }
+.book-controls summary { display: flex; align-items: center; gap: 12px; padding: 9px 12px; list-style: none; border-radius: 8px; cursor: pointer; }
+.book-controls summary::-webkit-details-marker { display: none; }
+.book-controls summary::after { content: "⌄"; color: #c5b5ff; }
+.book-controls[open] summary { background: #ffffff12; }
+.book-controls-panel { position: absolute; bottom: calc(100% + 12px); left: 0; display: flex; flex-wrap: wrap; gap: 8px; width: 250px; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 14px; border: 1px solid #ffffff26; border-radius: 12px; background: #171328f5; box-shadow: 0 12px 40px #0006; }
+.book-controls-panel [role="status"] { flex-basis: 100%; padding-bottom: 5px; color: #c9bedf; font-size: 11px; line-height: 1.5; }
+.book-controls-panel button, .book-controls-panel a { padding: 8px 11px; border: 1px solid #ffffff26; border-radius: 7px; background: #ffffff0b; color: white; font: inherit; text-decoration: none; cursor: pointer; }
+.book-controls-panel button:disabled { opacity: .35; cursor: default; }
+.book-controls-panel .site-link { flex-basis: 100%; background: #c5b5ff; color: #171027; text-align: center; font-weight: 600; }
+.book-page-select { min-width: 115px; max-width: 45vw; padding: 9px 12px; border: 0; border-radius: 8px; background: #ffffff08; color: #eee9ff; font: inherit; cursor: pointer; color-scheme: dark; }
+.book-page-select option { color: #fff; background: #171328; }
+.book-toolbar summary:focus-visible, .book-toolbar select:focus-visible, .book-controls-panel button:focus-visible, .book-controls-panel a:focus-visible { outline: 2px solid #c5b5ff; outline-offset: 3px; }
+@media (max-width: 600px) { .book-toolbar { font-size: 11px; } .book-controls summary, .book-page-select { padding: 8px 10px; } }

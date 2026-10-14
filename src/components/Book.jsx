@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCursor, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
@@ -19,7 +19,7 @@ import {
 } from "three";
 import { degToRad } from "three/src/math/MathUtils.js";
 
-import { pageAtom, pages } from "./UI";
+import { pageAtom, pages, playbackPageAtom } from "./UI";
 import { useHostedVideoTexture } from "./HostedVideo";
 import { useIndexPageTexture } from "./IndexPage";
 import { getPageContent, getSpreadProject, getSpreadVideo, isBookOpen } from "./page-content";
@@ -98,7 +98,7 @@ pages.forEach((page) => {
   useTexture.preload(`/textures/book-cover-roughness.jpg`);
 });
 
-const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, indexTexture, previewTexture, ...props }) => {
+const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requestedPage, turnVersion, onSettled, indexTexture, ...props }) => {
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -107,6 +107,10 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
       : []),
   ]);
   picture.colorSpace = picture2.colorSpace = SRGBColorSpace;
+  const previewTexture = usePreviewPageTexture(getSpreadProject(number));
+  const spread = number + 1;
+  const videoTexture = useHostedVideoTexture(playingPage === spread && isBookOpen(playingPage, pages.length), getSpreadVideo(spread), requestedPage === spread && isBookOpen(requestedPage, pages.length));
+  const settledState = useRef({ version: -1, reported: false });
   const group = useRef();
   const turnedAt = useRef(0);
   const lastOpened = useRef(opened);
@@ -191,6 +195,10 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
       return;
     }
 
+    if (settledState.current.version !== turnVersion) {
+      settledState.current = { version: turnVersion, reported: false };
+    }
+    let settled = true;
     const emissiveIntensity = highlighted ? 0.22 : 0;
     skinnedMeshRef.current.material[4].emissiveIntensity =
       skinnedMeshRef.current.material[5].emissiveIntensity = MathUtils.lerp(
@@ -252,6 +260,12 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
         easingFactorFold,
         delta
       );
+      const angleError = target.rotation.y - rotationAngle;
+      if (Math.abs(Math.atan2(Math.sin(angleError), Math.cos(angleError))) > 0.006 || Math.abs(target.rotation.x - foldRotationAngle * foldIntensity) > 0.006) settled = false;
+    }
+    if (settled && Date.now() - turnedAt.current >= 400 && !settledState.current.reported) {
+      settledState.current.reported = true;
+      onSettled(number, page, turnVersion);
     }
   });
 
@@ -290,10 +304,23 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
 export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
-  const videoTexture = useHostedVideoTexture(isBookOpen(page, pages.length) && isBookOpen(delayedPage, pages.length), getSpreadVideo(page));
+  const [playingPage, setPlayingPage] = useAtom(playbackPageAtom);
   const indexTexture = useIndexPageTexture();
-  const project = getSpreadProject(page);
-  const previewTexture = usePreviewPageTexture(project);
+  const settledSheets = useRef(new Map());
+  const turnTarget = useRef({ requested: null, rendered: null, version: 0 });
+  if (turnTarget.current.requested !== page || turnTarget.current.rendered !== delayedPage) {
+    turnTarget.current = { requested: page, rendered: delayedPage, version: turnTarget.current.version + 1 };
+    settledSheets.current.clear();
+  }
+  const onSettled = useCallback((number, settledPage, version) => {
+    if (version !== turnTarget.current.version) return;
+    settledSheets.current.set(number, settledPage);
+    if (settledPage !== turnTarget.current.requested || settledPage !== turnTarget.current.rendered) return;
+    for (let index = 0; index < pages.length; index++) {
+      if (settledSheets.current.get(index) !== settledPage) return;
+    }
+    setPlayingPage(settledPage);
+  }, [setPlayingPage]);
 
   useEffect(() => {
     let timeout;
@@ -328,9 +355,11 @@ export const Book = ({ ...props }) => {
       {[...pages].map((pageData, index) => (
         <Page
           key={index}
-          videoTexture={videoTexture}
           indexTexture={indexTexture}
-          previewTexture={previewTexture}
+          playingPage={playingPage}
+          requestedPage={page}
+          turnVersion={turnTarget.current.version}
+          onSettled={onSettled}
           page={delayedPage}
           number={index}
           opened={delayedPage > index}
