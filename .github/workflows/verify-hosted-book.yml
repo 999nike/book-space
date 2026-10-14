@@ -1,0 +1,29 @@
+name: Verify hosted book video pages
+on:
+  push:
+    branches: [capture/site-glimpses]
+    paths: [.github/workflows/verify-hosted-book.yml, tools/verify-hosted-book.cjs]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install isolated browser tools
+        run: |
+          npm install --prefix /tmp/book-capture playwright@1.62.0 --no-audit --no-fund
+          /tmp/book-capture/node_modules/.bin/playwright install --with-deps chromium
+      - run: node tools/verify-hosted-book.cjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: book-playback-check
+          path: |
+            book-preview-check.png
+            book-playback-report.json
+          if-no-files-found: warn
+          retention-days: 7
