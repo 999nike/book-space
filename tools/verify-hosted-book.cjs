@@ -57,12 +57,32 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
    },initial,{polling:100,timeout:30000});
    results.push({page:number,...state});
    console.log('PAGE_PLAYBACK '+JSON.stringify(results.at(-1)));
-   if(number===1||number===4){
+   if(number===1||number===2||number===4){
     const image=await page.screenshot({type:'jpeg',quality:75,timeout:60000});
     await fs.writeFile('book-page-'+number+'.jpg',image);
     console.log('FRAME_page'+number+'_BEGIN');console.log(image.toString('base64'));console.log('FRAME_page'+number+'_END');
    }
   }
+  const siteLinks=[
+   'https://space-junkz-shooter.vercel.app/game.html',
+   'https://junkz-shooter-landing.vercel.app/',
+   'https://smokey-space.vercel.app/'
+  ];
+  for(const [index,href] of siteLinks.entries()){
+   await page.getByRole('button',{name:'Page '+(index+1),exact:true}).click();
+   const link=page.getByRole('link',{name:'Visit site'});
+   if(await link.getAttribute('href')!==href||await link.getAttribute('target')!=='_blank')throw Error('Incorrect website destination');
+  }
+  await page.getByRole('button',{name:'Page 2',exact:true}).click();
+  await page.waitForTimeout(1600);
+  const before=await page.getByRole('button',{name:'Page 2',exact:true}).getAttribute('aria-current');
+  const popupPromise=page.waitForEvent('popup',{timeout:15000});
+  await page.mouse.click(745,450);
+  const popup=await popupPromise;
+  await popup.waitForURL('https://junkz-shooter-landing.vercel.app/',{timeout:30000});
+  await popup.close();
+  if(before!=='page'||await page.getByRole('button',{name:'Page 2',exact:true}).getAttribute('aria-current')!=='page')throw Error('Clicking the preview must open the website without turning the page');
+  console.log('PREVIEW_CLICK opens the landing site in a new tab and leaves Page 2 selected');
   requests.length=0;
   await page.getByRole('button',{name:'Page 1',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('video')?.currentSrc.includes('/startscreenlvl1.mp4')&&document.querySelector('video')?.readyState>=2);
@@ -74,7 +94,7 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
   await page.getByRole('button',{name:'Back Cover',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('video')?.paused===true);
   if(errors.length)throw Error(errors.join('; '));
-  const report={results,playlistResults,playlistLoops:true,indexLinks:3,backCoverPaused:true,oneDecoder:true,noIntermediateClipDownloads:true,pageErrors:errors};
+  const report={previewPageClick:true,siteLinks:true,results,playlistResults,playlistLoops:true,indexLinks:3,backCoverPaused:true,oneDecoder:true,noIntermediateClipDownloads:true,pageErrors:errors};
   await fs.writeFile('book-playback-report.json',JSON.stringify(report,null,2));
   console.log('BOOK_RESULT '+JSON.stringify(report));
  }finally{await browser.close();}
