@@ -9,8 +9,8 @@ export function applyVideoPageUVs(geometry, originalUV) {
 
 // Contain the full source inside one page, leaving extra room next to the spine.
 export function fitPageFrame(sourceWidth, sourceHeight, width, height, side = "left") {
-  const left = width * (side === "left" ? 0.04 : 0.08);
-  const right = width * (side === "left" ? 0.08 : 0.04);
+  const left = width * (side === "left" ? 0.04 : 0.16);
+  const right = width * (side === "left" ? 0.16 : 0.04);
   const top = height * 0.035;
   const availableWidth = width - left - right;
   const availableHeight = height - top * 2;
