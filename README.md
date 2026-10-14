@@ -1,21 +1,85 @@
-# Book Space — The Project Book
+# 📚 3D Book Slider Landing Page ✨
 
-A static Three.js showroom with curved, animated book pages. Junkz gameplay is the first page; its landing page is the second. Smokey Space is the following chapter. The scene background is deliberately simple for a later table-and-tea treatment.
+![Banner](./public/images/banner.jpeg)
 
-Run node serve.mjs from this folder and visit http://127.0.0.1:5173.
+🌐 Live Demo: (https://animated-book-slider-threejs.vercel.app/)
 
-## Videos
+![Three.js](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 
-The supplied URLs are websites, not video files. No recordings were supplied. The animated artwork is explicitly labelled a concept preview. To add actual clips, put MP4 or WebM files in dist/videos and set each project's video property in dist/projects.js. The current chapter can also preview a local video via the Add video control; that selection is temporary and is never uploaded. Muted autoplay, play/pause, sound, fullscreen, chapter navigation, and pausing hidden clips are supported. For remote clips, the media server must permit CORS. Each project’s actual website is linked.
+An immersive 3D Book Slider landing page built with Three.js and React Three Fiber, featuring stunning page-turning animations and interactive elements.
 
-## Rendering and accessibility
+## 🌟 Features
 
-Three.js loads from a pinned CDN version. If it cannot load or WebGL is unavailable, a CSS book fallback preserves chapters, video previews, and links. Keyboard arrows turn pages. Reduced motion is respected. The modal has keyboard focus containment and Escape support.
+- 🎨 Realistic 3D book rendering
+- 🔄 Smooth page-turning animations
+- 📱 Responsive design
+- 🖱️ Interactive user controls
+- ⚡ Optimised performance
+- 🎭 Custom shader materials
 
-## Credits
+## 🛠️ Technologies Used
 
-Book concept inspired by https://github.com/pakagronglb/animated-book-slider-threejs and the Wawa Sensei tutorial credited there. This implementation uses original page geometry and materials; no source assets or code were copied from that repository.
+- Three.js for 3D rendering
+- React Three Fiber for React integration
+- TypeScript for type safety
+- Vite for development environment
+- Custom GLSL shaders
+- React Spring for animations
 
-## Verification
+## 🚀 Getting Started
 
-Syntax checks and the DOM/media interaction harness pass: run npm run check. The local server returns HTTP 200 for the main page and assets. Actual WebGL visuals, mobile layout, real codec playback, and fullscreen require a connected browser and were not visually verified in this session. Hosting source synchronization was blocked by an unreachable git.chatgpt-team.site server; the registered site remains unpublished.
+1. Clone the repository:
+
+```bash
+git clone https://github.com/pakagronglb/animated-book-slider-threejs.git
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Run the development server:
+
+```bash
+npm run dev
+```
+
+## 📖 Usage
+
+- Click on book corners to turn pages
+- Drag to rotate the book view
+- Scroll to zoom in/out
+- Press ESC to reset view
+
+## 🎯 Implementation Details
+
+- Custom BoxGeometry for page creation
+- SkinnedMesh for page-turning animations
+- Optimized texture loading
+- Custom pointer events handling
+- Delayed page transitions for smooth animations
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Credits
+
+This project was inspired by and created following the tutorial by [Wawa Sensei](https://www.youtube.com/watch?v=b7a_Y1Ja6js). Check out their amazing content:
+
+- 🎓 [Complete React Three Fiber Course](https://lessons.wawasensei.dev/course)
+
+### 🔗 Useful Resources
+
+- [Squoosh](https://squoosh.app/) - Texture compression
+- [Three.js Docs](https://threejs.org/docs/)
+- [GraphToy](https://graphtoy.com/)
