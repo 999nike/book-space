@@ -5,7 +5,7 @@ const out=path.resolve('capture-output');
 async function exportFile(file){const b=await fs.readFile(path.join(out,file));console.log('VIDEO_'+file+'_BEGIN');console.log(b.toString('base64'));console.log('VIDEO_'+file+'_END');}
 (async()=>{
  await fs.mkdir(out,{recursive:true});
- for(const file of ['junkz-landing.mp4','smokey-space.mp4']) await exportFile(file);
+ // Existing website clips were already transferred; this pass records combat only.
  const browser=await chromium.launch({headless:true});
  const context=await browser.newContext({viewport:{width:1024,height:1368},recordVideo:{dir:path.join(out,'raw-game'),size:{width:1024,height:1368}}});
  const page=await context.newPage();
@@ -20,7 +20,7 @@ async function exportFile(file){const b=await fs.readFile(path.join(out,file));c
   await page.waitForTimeout(1200);
   if(await page.locator('#addPlayerBtn').isVisible()){
    await page.locator('#addPlayerBtn').click();
-   await page.locator('#newPlayerName').fill('BookPreview');
+   await page.locator('#newPlayerName').fill('BookCapture');
    await Promise.all([page.waitForEvent('domcontentloaded',{timeout:30000}),page.locator('#savePlayerBtn').click()]);
    await page.waitForTimeout(5000);
    if(await skip.isVisible()) await skip.click();
@@ -30,15 +30,17 @@ async function exportFile(file){const b=await fs.readFile(path.join(out,file));c
   await page.waitForFunction(()=>window.GameState?.running&&!window.MainMenu?.active,{},{timeout:30000});
   if(await page.locator('#btnFire').isVisible()) await page.locator('#btnFire').click();
   await page.mouse.move(512,430);
-  await page.waitForTimeout(1200);
+  await page.mouse.down({button:'left'});
+  await page.waitForTimeout(9000);
   await page.screenshot({path:path.join(out,'junkz-game-preview.png')});
-  const state=()=>page.evaluate(()=>({running:window.GameState?.running,level:window.GameState?.currentLevel,score:window.GameState?.score,lives:window.GameState?.lives}));
+  const state=()=>page.evaluate(()=>({running:window.GameState?.running,level:window.GameState?.currentLevel,score:window.GameState?.score,lives:window.GameState?.lives,firing:window.GameState?.firing}));
   const before=await state();
   for(const key of ['ArrowLeft','ArrowRight','ArrowRight','ArrowLeft']){
    await page.keyboard.down(key);await page.waitForTimeout(1200);await page.keyboard.up(key);await page.waitForTimeout(800);
   }
   const after=await state();
   await page.waitForTimeout(200);
+  await page.mouse.up({button:'left'});
   const raw=await page.video().path();await context.close();
   const probe=JSON.parse(execFileSync('ffprobe',['-v','error','-show_format','-of','json',raw]));
   const mp4=path.join(out,'junkz-game.mp4');
