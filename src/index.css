@@ -33,6 +33,3 @@ body {
 .video-controls .site-link { background: #c5b5ff; color: #151027; border-color: #c5b5ff; font-weight: 600; }
 @media (max-width: 600px) { .video-controls [role="status"] { flex-basis: 100%; text-align: center; } }
 
-.book-page-website { display: block; width: 180px; padding: 13px 10px; box-sizing: border-box; border: 2px solid #d9ffff; border-radius: 8px; background: #baff53; color: #11172b; box-shadow: 0 0 20px #24dfff55, 5px 5px 0 #e82cd7; text-align: center; text-decoration: none; font: 700 15px Poppins, sans-serif; white-space: nowrap; backface-visibility: hidden; cursor: pointer; }
-.book-page-website:hover { background: #e0ff9b; }
-.book-page-website:focus-visible { outline: 3px solid white; outline-offset: 4px; }

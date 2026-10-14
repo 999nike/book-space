@@ -1,16 +1,14 @@
 # Book media
 
-Video files stay on WIZZ Media, outside Git and the Vercel build.
+Original videos stay on WIZZ Media, outside Git and the Vercel build.
 
-- Page 1: /book-space/1.mp4 → 3.mp4 → 4.mp4 → 5.mp4, repeating in that order.
+- Page 1: /book-space/1.mp4 → 3.mp4 → 4.mp4 → 5.mp4.
 - Page 2: /book-space/landing.mp4.
-- Page 3 retains the existing Smokey Space video.
-- Page 4: /book-space/universal.mp4, complete original recording, filling the left page. The three-app information remains on the right.
+- Page 3: existing Smokey Space video.
+- Page 4: /book-space/universal.mp4.
 
-The new videos use cover fitting on the complete left page, with no borders or spine split. Aspect ratio is preserved; excess edges crop when the source and page ratios differ. Older clips retain their previous contained framing. Originals are unchanged.
+New recordings now show the complete frame, centred within 98% of the page. No source edges are cropped or stretched; spare space depends on the recording's aspect ratio. Original recordings are unchanged.
 
-Pages 1 and 2 have a Space Junkz graffiti title on the right. A native HTML website link is attached to the page's centre bone below the title, so it follows the page and opens normally in a new tab. The game page links to https://space-junkz-shooter.vercel.app/game.html and the landing page to https://junkz-shooter-landing.vercel.app/.
+Right pages 1, 2 and 4 use the supplied public/images/wizzlab-logo.png artwork with the project name beneath it. Generated imitation lettering and buttons on the paper are no longer used. Website links remain in the controls below the book; page clicks and Previous/Next turn pages. The current page order, book shape, materials and turning animation are retained.
 
-Previous/Next buttons and page clicks turn the book. The separate Open website button remains available below it. The original book shape, shine and turning animation are retained.
-
-Fixed same-origin rewrites provide WebGL video access from https://media.w-i-z-z-lab-studios.com. Video storage remains on the user's server; proxy playback traffic passes through Vercel.
+Fixed same-origin media rewrites provide video access from https://media.w-i-z-z-lab-studios.com. Storage remains on the user's server; proxy playback traffic passes through Vercel.

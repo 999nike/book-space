@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
-import { drawJunkzBrand } from "./JunkzBrand";
+import { drawWizzBrand } from "./WizzBrand";
 
 export function usePreviewPageTexture(project) {
   const [ready, setReady] = useState(null);
@@ -16,8 +16,8 @@ export function usePreviewPageTexture(project) {
       canvas.height = 1368;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      if (branding === "junkz") {
-        drawJunkzBrand(ctx, edition);
+      if (branding === "wizz") {
+        drawWizzBrand(ctx, image, edition);
       } else {
         ctx.fillStyle = "#090b18";
         ctx.fillRect(0, 0, 1024, 1368);
@@ -50,11 +50,8 @@ export function usePreviewPageTexture(project) {
       texture.colorSpace = SRGBColorSpace;
       setReady({ preview, href, title, info, branding, edition, texture });
     };
-    if (branding === "junkz") paint();
-    else {
-      image.onload = paint;
-      image.src = preview;
-    }
+    image.onload = paint;
+    image.src = preview;
     return () => {
       cancelled = true;
       image.onload = null;

@@ -9,6 +9,10 @@ export function applyVideoPageUVs(geometry, originalUV) {
 
 // Contain the full source inside one page, leaving extra room next to the spine.
 export function fitPageFrame(sourceWidth, sourceHeight, width, height, side = "left", fit = "contain") {
+  if (fit === "page") {
+    const scale = Math.min(width * 0.98 / sourceWidth, height * 0.98 / sourceHeight);
+    return { x: (width - sourceWidth * scale) / 2, y: (height - sourceHeight * scale) / 2, width: sourceWidth * scale, height: sourceHeight * scale };
+  }
   if (fit === "cover") {
     const scale = Math.max(width / sourceWidth, height / sourceHeight);
     return { x: (width - sourceWidth * scale) / 2, y: (height - sourceHeight * scale) / 2, width: sourceWidth * scale, height: sourceHeight * scale };
