@@ -1,0 +1,26 @@
+name: Check video and website preview layout
+on:
+  push:
+    branches: [capture/site-glimpses]
+    paths: [.github/workflows/quick-preview.yml, tools/quick-preview.cjs]
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install browser tools
+        run: |
+          npm install --prefix /tmp/book-capture playwright@1.62.0 --no-audit --no-fund
+          /tmp/book-capture/node_modules/.bin/playwright install --with-deps chromium
+      - run: node tools/quick-preview.cjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: preview-layout
+          path: quick-page-*.jpg
+          retention-days: 7
