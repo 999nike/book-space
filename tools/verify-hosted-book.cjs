@@ -2,7 +2,7 @@ const fs=require('node:fs/promises');
 const {chromium}=require('/tmp/book-capture/node_modules/playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true});
- const context=await browser.newContext({viewport:{width:1024,height:1368}});
+ const context=await browser.newContext({viewport:{width:1280,height:900}});
  const page=await context.newPage(), errors=[];
  const clipIds=['junkz-game','junkz-landing','smokey-space'];
  page.on('pageerror',e=>errors.push(e.message));
@@ -28,6 +28,7 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
    if(state.videos!==1)throw Error('Expected one decoder');
    if(!state.source.includes('/'+clipIds[number-1]+'.mp4')||state.label==='Star preview')throw Error('Wrong clip on page '+number);
    if(number===2)await page.screenshot({path:'book-preview-check.png'});
+   if(number===3){const image=await page.screenshot({type:'jpeg',quality:65});console.log('FRAME_spread_BEGIN');console.log(image.toString('base64'));console.log('FRAME_spread_END');}
   }
   await page.getByRole('button',{name:'Index',exact:true}).click();
   await page.getByRole('complementary',{name:'Project index'}).waitFor();
