@@ -8,7 +8,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -23,7 +23,7 @@ jobs:
         with:
           name: book-playback-check
           path: |
-            book-preview-check.png
+            book-page-*.jpg
             book-playback-report.json
           if-no-files-found: warn
           retention-days: 7

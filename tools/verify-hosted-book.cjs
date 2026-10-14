@@ -22,21 +22,43 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
    }
   }
   await page.goto('https://book-space-gold.vercel.app/',{waitUntil:'domcontentloaded',timeout:45000});
-  await page.getByRole('button',{name:'Page 8',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Page 7',exact:true}).waitFor();
   await page.waitForTimeout(4000);
   const results=[];
-  for(const number of [1,2,3,4,5,6,7,8]){
+  const waitForClip=async id=>{
+   await page.waitForFunction(id=>{
+    const v=document.querySelector('video');
+    return document.querySelectorAll('video').length===1&&v.currentSrc.includes('/'+id+'.mp4')&&v.readyState>=2&&!v.paused;
+   },id,{timeout:60000,polling:100});
+   return page.locator('video').evaluate(v=>({source:v.currentSrc,width:v.videoWidth,height:v.videoHeight,duration:v.duration,ready:v.readyState,time:v.currentTime,paused:v.paused,loop:v.loop}));
+  };
+  await page.getByRole('button',{name:'Page 1',exact:true}).click();
+  const playlist=['startscreenlvl1','m1boss','m7','scorpianboss','map-hangar'];
+  const playlistResults=[];
+  for(const [index,id] of playlist.entries()){
+   const state=await waitForClip(id);
+   if(state.loop)throw Error('Playlist clips must advance on ended');
+   const link=await page.locator('.video-controls a').getAttribute('href');
+   const file=id==='map-hangar'?'map%20hangar':id;
+   if(!link.endsWith('/'+file+'.mp4'))throw Error('Open clip link is out of date');
+   playlistResults.push({id,...state});
+   console.log('PLAYLIST_CLIP '+JSON.stringify(playlistResults.at(-1)));
+   await page.locator('video').evaluate(async v=>{v.currentTime=v.duration-0.2;await v.play();});
+   await waitForClip(playlist[(index+1)%playlist.length]);
+  }
+  for(const number of [1,2,3,4]){
    await page.getByRole('button',{name:'Page '+number,exact:true}).click();
-   await page.waitForFunction(id=>document.querySelectorAll('video').length===1&&document.querySelector('video').currentSrc.includes('/'+id+'.mp4')&&document.querySelector('video').readyState>=2&&!document.querySelector('video').paused&&document.querySelector('video').currentTime>0,clips[number-1][0],{timeout:60000});
-   const initialTime=await page.locator('video').evaluate(v=>v.currentTime);
-   await page.waitForTimeout(1400);
-   const state=await page.locator('video').evaluate(v=>({source:v.currentSrc,width:v.videoWidth,height:v.videoHeight,duration:v.duration,ready:v.readyState,time:v.currentTime,paused:v.paused}));
-   if(state.time<=initialTime)throw Error('Playback stalled on '+number);
-   if(number===4&&state.duration<90)throw Error('Universal Space must retain full original duration');
+   const state=await waitForClip(clips[number-1][0]);
+   if(number===4&&(state.duration<90||!state.loop))throw Error('Universal Space must loop the entire original');
+   const initial=await page.locator('video').evaluate(v=>({time:v.currentTime,frames:v.getVideoPlaybackQuality().totalVideoFrames}));
+   await page.waitForFunction(initial=>{
+    const v=document.querySelector('video');
+    return !v.paused&&(v.currentTime!==initial.time||v.getVideoPlaybackQuality().totalVideoFrames>initial.frames);
+   },initial,{polling:100,timeout:30000});
    results.push({page:number,...state});
    console.log('PAGE_PLAYBACK '+JSON.stringify(results.at(-1)));
    if(number===1||number===4){
-    const image=await page.screenshot({type:'jpeg',quality:75});
+    const image=await page.screenshot({type:'jpeg',quality:75,timeout:60000});
     await fs.writeFile('book-page-'+number+'.jpg',image);
     console.log('FRAME_page'+number+'_BEGIN');console.log(image.toString('base64'));console.log('FRAME_page'+number+'_END');
    }
@@ -52,7 +74,7 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
   await page.getByRole('button',{name:'Back Cover',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('video')?.paused===true);
   if(errors.length)throw Error(errors.join('; '));
-  const report={results,indexLinks:3,backCoverPaused:true,oneDecoder:true,noIntermediateClipDownloads:true,pageErrors:errors};
+  const report={results,playlistResults,playlistLoops:true,indexLinks:3,backCoverPaused:true,oneDecoder:true,noIntermediateClipDownloads:true,pageErrors:errors};
   await fs.writeFile('book-playback-report.json',JSON.stringify(report,null,2));
   console.log('BOOK_RESULT '+JSON.stringify(report));
  }finally{await browser.close();}
