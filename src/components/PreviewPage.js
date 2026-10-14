@@ -38,5 +38,5 @@ export function usePreviewPageTexture(project) {
       texture?.dispose();
     };
   }, [preview, title, href]);
-  return ready?.preview === preview && ready?.href === href && ready?.title === title ? ready.texture : null;
+  return ready && ready.preview === preview && ready.href === href && ready.title === title ? ready.texture : null;
 }
