@@ -21,3 +21,5 @@ If the media server does not send cross-origin headers, fixed Vercel rewrites
 provide same-origin access for the 3D video texture. The source stays on the media
 server; fallback traffic passes through Vercel. A missing clip falls back to the
 existing star preview. Retry or refresh the book after installing the files.
+
+Videos now form one continuous picture across each two-page spread: the left face samples the left half, and the right face samples the right half, from one shared video texture and decoder. Only UV coordinates change; vertex positions, skin weights, bones, material settings and turn animation remain upstream. The spread uses aspect-preserving cover cropping. Portrait clips crop vertically; landscape footage suits the wider spread. The video beside the final index keeps its single-page framing.

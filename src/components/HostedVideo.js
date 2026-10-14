@@ -3,11 +3,12 @@ import { atom, useSetAtom } from "jotai";
 import { SRGBColorSpace, VideoTexture } from "three";
 import { createVideoController } from "./video-controller";
 import { STAR_VIDEO } from "./page-content";
+import { PAGE_ASPECT, SPREAD_ASPECT } from "./video-layout";
 
 export const videoStatusAtom = atom("idle");
 export const videoControllerAtom = atom(null);
 
-export function useHostedVideoTexture(active, clip = STAR_VIDEO) {
+export function useHostedVideoTexture(active, clip = STAR_VIDEO, panoramic = true) {
   const [readyTexture, setReadyTexture] = useState(null);
   const { url, fallback, backup } = clip;
   const [controller, setController] = useState(null);
@@ -38,11 +39,11 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO) {
 
   useEffect(() => {
     if (!controller) return;
-    const sync = () => controller.update({ active, visible: !document.hidden });
+    const sync = () => controller.update({ active, visible: !document.hidden, aspect: panoramic ? SPREAD_ASPECT : PAGE_ASPECT });
     sync();
     document.addEventListener("visibilitychange", sync);
     return () => document.removeEventListener("visibilitychange", sync);
-  }, [controller, active]);
+  }, [controller, active, panoramic]);
 
   return readyTexture?.url === url ? readyTexture.map : null;
 }

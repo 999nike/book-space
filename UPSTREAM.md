@@ -27,3 +27,5 @@ E:\WIZZ-Server\media and are not committed to this repository.
 A single decoder is replaced when the selected clip changes. If a project clip
 is unavailable, the existing star preview remains available and the controls
 offer Retry. The book geometry, materials and turning animation are unchanged.
+
+Videos now form one continuous picture across each two-page spread: the left face samples the left half, and the right face samples the right half, from one shared video texture and decoder. Only UV coordinates change; vertex positions, skin weights, bones, material settings and turn animation remain upstream. The spread uses aspect-preserving cover cropping. Portrait clips crop vertically; landscape footage suits the wider spread. The video beside the final index keeps its single-page framing.

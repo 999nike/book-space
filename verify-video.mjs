@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createVideoController, HOSTED_VIDEO_URL, TEST_VIDEO_FALLBACK } from "./src/components/video-controller.js";
+import { PAGE_ASPECT, SPREAD_ASPECT } from "./src/components/video-layout.js";
 import { BOOK_SHEETS, getPageContent, getSpreadVideo, isBookOpen } from "./src/components/page-content.js";
 const surfaces=Array.from({length:BOOK_SHEETS},(_,number)=>getPageContent(number,BOOK_SHEETS));
 const kinds=surfaces.flatMap(surface=>[surface.front,surface.back]);
@@ -35,7 +36,10 @@ await Promise.resolve();
 assert.equal(video.paused,false);
 video.readyState=4;video.fire("loadedmetadata");video.fire("loadeddata");
 assert.equal(ready.at(-1),true);
-assert.ok(Math.abs(texture.repeat.x-(1.28/1.71)/(1920/1080))<0.00001,"crop preserves video aspect");
+assert.ok(Math.abs(texture.repeat.x-SPREAD_ASPECT/(1920/1080))<0.00001,"crop preserves video aspect");
+controller.update({aspect:PAGE_ASPECT});assert.ok(Math.abs(texture.repeat.x-PAGE_ASPECT/(1920/1080))<0.00001,"index-facing video fits one page");
+assert.equal(video.loads,1,"layout changes do not restart the stream");
+controller.update({aspect:SPREAD_ASPECT});
 controller.update({active:false});assert.equal(video.paused,true,"turned pages pause");
 controller.update({active:true});assert.equal(video.paused,false,"visible page resumes");
 controller.toggle();assert.equal(video.paused,true);

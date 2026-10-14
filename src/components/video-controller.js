@@ -1,9 +1,12 @@
+import { getVideoCrop, SPREAD_ASPECT } from "./video-layout.js";
+
 export const HOSTED_VIDEO_URL = "https://media.w-i-z-z-lab-studios.com/space-junkz/background_video2.mp4";
 export const TEST_VIDEO_FALLBACK = "/test-media/background.mp4";
 
 // Owns only the video element. The book's geometry, materials and animation stay upstream.
 export function createVideoController(video, texture, onStatus, onReady, sources = { url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK }) {
   let active = false, visible = true, paused = false, disposed = false;
+  let targetAspect = SPREAD_ASPECT;
   let attached = false, routeIndex = 0, failed = false, timer = null, attempt = 0;
   const routes = [sources.url, sources.fallback, sources.backup].filter(Boolean);
   const playingStatus = () => sources.backup && routeIndex === routes.length - 1 ? "placeholder" : "playing";
@@ -38,18 +41,9 @@ export function createVideoController(video, texture, onStatus, onReady, sources
     play();
   }
   const onMetadata = () => {
-    // Center-crop this landscape background onto the original portrait page.
-    const pageAspect = 1.28 / 1.71;
-    const videoAspect = video.videoWidth / video.videoHeight;
-    texture.repeat.set(1, 1);
-    texture.offset.set(0, 0);
-    if (videoAspect > pageAspect) {
-      texture.repeat.x = pageAspect / videoAspect;
-      texture.offset.x = (1 - texture.repeat.x) / 2;
-    } else if (videoAspect > 0) {
-      texture.repeat.y = videoAspect / pageAspect;
-      texture.offset.y = (1 - texture.repeat.y) / 2;
-    }
+    const crop = getVideoCrop(video.videoWidth, video.videoHeight, targetAspect);
+    texture.repeat.set(crop.repeatX, crop.repeatY);
+    texture.offset.set(crop.offsetX, crop.offsetY);
   };
   const onData = () => {
     clearTimer();
@@ -75,6 +69,7 @@ export function createVideoController(video, texture, onStatus, onReady, sources
   return {
     update(next) {
       if (disposed) return;
+      if ("aspect" in next && next.aspect > 0) { targetAspect = next.aspect; onMetadata(); }
       if ("active" in next) active = next.active;
       if ("visible" in next) visible = next.visible;
       if (!active || !visible || paused) video.pause();
