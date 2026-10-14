@@ -39,7 +39,7 @@ export function usePreviewPageTexture(project) {
         ctx.font = "22px Arial, sans-serif";
         ctx.fillText("WIZZ LAB STUDIOS  /  PROJECT NOTES", 170, 1310);
       } else {
-        ctx.fillText("OPEN WEBSITE  ↗", 170, 1310);
+        ctx.fillText("OPEN WEBSITE USING THE BUTTON BELOW", 170, 1310);
       }
       texture = new CanvasTexture(canvas);
       texture.colorSpace = SRGBColorSpace;

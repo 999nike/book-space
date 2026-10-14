@@ -98,7 +98,7 @@ pages.forEach((page) => {
   useTexture.preload(`/textures/book-cover-roughness.jpg`);
 });
 
-const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, indexTexture, previewTexture, project, ...props }) => {
+const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, indexTexture, previewTexture, ...props }) => {
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -273,11 +273,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
       }}
       onClick={(e) => {
         e.stopPropagation();
-        if (number === page && !bookClosed && e.face?.materialIndex === 4 && project) {
-          if (project.href) window.open(project.href, "_blank", "noopener,noreferrer");
-        } else {
-          setPage(opened ? number : number + 1);
-        }
+        setPage(opened ? number : number + 1);
         setHighlighted(false);
       }}
     >
@@ -334,7 +330,6 @@ export const Book = ({ ...props }) => {
           videoTexture={videoTexture}
           indexTexture={indexTexture}
           previewTexture={previewTexture}
-          project={project}
           page={delayedPage}
           number={index}
           opened={delayedPage > index}

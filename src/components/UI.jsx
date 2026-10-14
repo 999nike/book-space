@@ -38,17 +38,20 @@ export const UI = () => {
 
   return (
     <main className="book-ui pointer-events-none select-none fixed inset-0 z-10 flex justify-end flex-col">
-      {isBookOpen(page, pages.length) && (
-        <div className="video-controls pointer-events-auto" aria-label="Book video controls">
-          <span role="status">{status === "loading" ? "Loading video…" : status === "error" ? "Video unavailable" : status === "placeholder" ? "Star preview" : currentClip.label}</span>
-          <button type="button" disabled={!controller || status === "loading" || status === "error"} onClick={() => controller?.toggle()}>
-            {(status === "playing" || status === "placeholder") ? "Pause" : "Play"}
-          </button>
-          {(status === "error" || status === "paused" || status === "placeholder") && <button type="button" onClick={() => controller?.retry()}>Retry</button>}
-          {project?.href && <a href={project.href} target="_blank" rel="noopener noreferrer">Visit site ↗</a>}
-          <a href={currentClip.url} target="_blank" rel="noopener noreferrer">Open clip ↗</a>
-        </div>
-      )}
+      <div className="video-controls pointer-events-auto" aria-label="Book controls">
+        <button type="button" aria-label="Previous page" disabled={page === 0} onClick={() => setPage(value => Math.max(0, value - 1))}>← Previous</button>
+        {isBookOpen(page, pages.length) && (
+          <>
+            <span role="status">{status === "loading" ? "Loading video…" : status === "error" ? "Video unavailable" : status === "placeholder" ? "Star preview" : currentClip.label}</span>
+            <button type="button" disabled={!controller || status === "loading" || status === "error"} onClick={() => controller?.toggle()}>
+              {(status === "playing" || status === "placeholder") ? "Pause" : "Play"}
+            </button>
+            {(status === "error" || status === "paused" || status === "placeholder") && <button type="button" onClick={() => controller?.retry()}>Retry</button>}
+            {project?.href && <a className="site-link" href={project.href} target="_blank" rel="noopener noreferrer">Open website ↗</a>}
+          </>
+        )}
+        <button type="button" aria-label="Next page" disabled={page === pages.length} onClick={() => setPage(value => Math.min(pages.length, value + 1))}>Next →</button>
+      </div>
       {page === pages.length - 1 && (
         <aside className="project-index pointer-events-auto" aria-label="Project index">
           <span className="index-label">THE INDEX</span>

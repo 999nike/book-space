@@ -17,11 +17,11 @@ body {
   -webkit-text-stroke: 1px white;
 }
 
-.video-controls { position: absolute; top: 24px; right: 24px; display: flex; align-items: center; gap: 10px; color: #fff; font: 12px Poppins, sans-serif; padding: 10px 14px; border: 1px solid #ffffff26; border-radius: 12px; background: #141224aa; backdrop-filter: blur(12px); }
+.video-controls { position: absolute; top: auto; bottom: 148px; left: 50%; right: auto; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; color: #fff; font: 12px Poppins, sans-serif; padding: 10px 14px; border: 1px solid #ffffff26; border-radius: 12px; background: #141224aa; backdrop-filter: blur(12px); }
 .video-controls button, .video-controls a { padding: 7px 10px; border: 1px solid #ffffff33; border-radius: 7px; color: #fff; background: #ffffff0d; text-decoration: none; cursor: pointer; }
 .video-controls button:disabled { opacity: .45; cursor: default; }
 .video-controls button:focus-visible, .video-controls a:focus-visible { outline: 2px solid #b8a5ff; outline-offset: 3px; }
-@media (max-width: 600px) { .video-controls { top: 16px; right: 16px; left: 16px; font-size: 10px; justify-content: center; flex-wrap: wrap; } .book-ui nav > div { gap: 8px; padding: 20px 12px; } .book-ui nav button { font-size: 11px; padding: 10px 13px; } }
+@media (max-width: 600px) { .video-controls { top: auto; bottom: 90px; right: auto; left: 50%; font-size: 10px; justify-content: center; flex-wrap: wrap; } .book-ui nav > div { gap: 8px; padding: 20px 12px; } .book-ui nav button { font-size: 11px; padding: 10px 13px; } }
 
 .project-index { position: absolute; top: 90px; right: 24px; width: 240px; padding: 16px; border: 1px solid #ffffff26; border-radius: 12px; background: #141224e8; backdrop-filter: blur(12px); color: white; font: 12px Poppins, sans-serif; }
 .index-label { display: block; color: #c5b5ff; font-size: 10px; letter-spacing: .18em; margin-bottom: 8px; }
@@ -29,3 +29,6 @@ body {
 .project-index a:hover { color: #c5b5ff; }
 .project-index a:focus-visible { outline: 2px solid #b8a5ff; outline-offset: 3px; }
 @media (max-width: 600px) { .project-index { top: 112px; right: 16px; width: 190px; padding: 12px; } .project-index a { padding: 9px 0; } }
+
+.video-controls .site-link { background: #c5b5ff; color: #151027; border-color: #c5b5ff; font-weight: 600; }
+@media (max-width: 600px) { .video-controls [role="status"] { flex-basis: 100%; text-align: center; } }
