@@ -1,0 +1,40 @@
+name: Prepare book clips and capture gameplay
+on:
+  push:
+    branches: [capture/site-glimpses]
+    paths: [.github/workflows/capture-book-game.yml, tools/capture-book-game.cjs]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: book-site-glimpses
+          run-id: 38621485144
+          github-token: ${{ github.token }}
+          path: capture-output
+      - name: Install capture tools
+        run: |
+          npm install --prefix /tmp/book-capture playwright@1.62.0 --no-audit --no-fund
+          /tmp/book-capture/node_modules/.bin/playwright install --with-deps chromium
+          sudo apt-get install -y ffmpeg
+      - name: Prepare existing clips and record real game controls
+        run: node tools/capture-book-game.cjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: book-preview-clips
+          path: |
+            capture-output/*.mp4
+            capture-output/*.png
+            capture-output/*-check.jpg
+            capture-output/*report.json
+          retention-days: 7
+          if-no-files-found: error
