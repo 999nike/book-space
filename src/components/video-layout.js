@@ -11,7 +11,7 @@ export function applyVideoPageUVs(geometry, originalUV) {
 export function fitPageFrame(sourceWidth, sourceHeight, width, height, side = "left", fit = "contain") {
   if (fit === "page") {
     const scale = Math.min(width * 0.98 / sourceWidth, height * 0.98 / sourceHeight);
-    return { x: (width - sourceWidth * scale) / 2, y: (height - sourceHeight * scale) / 2, width: sourceWidth * scale, height: sourceHeight * scale };
+    return { x: (width - sourceWidth * scale) / 2, y: height * 0.01, width: sourceWidth * scale, height: sourceHeight * scale };
   }
   if (fit === "cover") {
     const scale = Math.max(width / sourceWidth, height / sourceHeight);
@@ -25,5 +25,5 @@ export function fitPageFrame(sourceWidth, sourceHeight, width, height, side = "l
   const scale = Math.min(availableWidth / sourceWidth, availableHeight / sourceHeight);
   const frameWidth = sourceWidth * scale;
   const frameHeight = sourceHeight * scale;
-  return { x: left + (availableWidth - frameWidth) / 2, y: top + (availableHeight - frameHeight) / 2, width: frameWidth, height: frameHeight };
+  return { x: left + (availableWidth - frameWidth) / 2, y: top, width: frameWidth, height: frameHeight };
 }

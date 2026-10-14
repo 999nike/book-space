@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { atom, useSetAtom } from "jotai";
 import { createPageVideoTexture } from "./PageVideoTexture";
 import { createVideoController, getPlaybackSources } from "./video-controller";
@@ -9,6 +9,7 @@ export const videoControllerAtom = atom(null);
 export const playingClipAtom = atom(null);
 
 export function useHostedVideoTexture(active, clip = STAR_VIDEO) {
+  const continueSequence = useRef(null);
   const [readyTexture, setReadyTexture] = useState(null);
   const [position, setPosition] = useState({ id: null, index: 0 });
   const clipIndex = position.id === clip.id ? position.index : 0;
@@ -27,17 +28,21 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO) {
     video.muted = true;
     video.loop = clipCount === 1;
     video.playsInline = true;
-    video.preload = "metadata";
+    video.preload = "auto";
     video.hidden = true;
     video.setAttribute("aria-hidden", "true");
     const onEnded = () => {
-      if (clipCount > 1) setPosition({ id: clip.id, index: (clipIndex + 1) % clipCount });
+      if (clipCount > 1) {
+        continueSequence.current = clip.id;
+        setPosition({ id: clip.id, index: (clipIndex + 1) % clipCount });
+      }
     };
     video.addEventListener("ended", onEnded);
     document.body.appendChild(video);
     const pageVideo = createPageVideoTexture(video, { fit });
     const map = pageVideo.texture;
-    const player = createVideoController(video, map, setStatus, (ready) => setReadyTexture(ready ? { url, map } : null), getPlaybackSources({ url, fallback, backup }));
+    const player = createVideoController(video, map, setStatus, (ready) => setReadyTexture(ready ? { url, map } : null), getPlaybackSources({ url, fallback, backup }), { startPaused: continueSequence.current !== clip.id });
+    continueSequence.current = null;
     setPlayingClip({ spreadId: clip.id, url, label: currentClip.label });
     setController(player);
     setSharedController(player);

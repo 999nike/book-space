@@ -9,8 +9,8 @@ export function getPlaybackSources({ url, fallback, backup }) {
 }
 
 // Owns only the video element. The book's geometry, materials and animation stay upstream.
-export function createVideoController(video, texture, onStatus, onReady, sources = getPlaybackSources({ url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK })) {
-  let active = false, visible = true, paused = false, disposed = false;
+export function createVideoController(video, texture, onStatus, onReady, sources = getPlaybackSources({ url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK }), { startPaused = false } = {}) {
+  let active = false, visible = true, paused = startPaused, disposed = false;
   let attached = false, routeIndex = 0, failed = false, timer = null, attempt = 0;
   const routes = [sources.url, sources.fallback, sources.backup].filter(Boolean);
   const playingStatus = () => sources.backup && routeIndex === routes.length - 1 ? "placeholder" : "playing";
@@ -45,7 +45,7 @@ export function createVideoController(video, texture, onStatus, onReady, sources
     play();
   }
   const onMetadata = () => {
-    // Show every source pixel. The page geometry splits this full frame at the spine.
+    // Show every source pixel. The video page contains the complete source frame.
     texture.repeat.set(1, 1);
     texture.offset.set(0, 0);
   };
@@ -75,8 +75,9 @@ export function createVideoController(video, texture, onStatus, onReady, sources
       if (disposed) return;
       if ("active" in next) active = next.active;
       if ("visible" in next) visible = next.visible;
-      if (!active || !visible || paused) video.pause();
+      if (!active || !visible) video.pause();
       else if (!attached) load(0);
+      else if (paused) video.pause();
       else play();
     },
     toggle() {
