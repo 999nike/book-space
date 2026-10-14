@@ -7,15 +7,15 @@
     },
     {
       "source": "/test-media/junkz-landing.mp4",
-      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/junkz-landing.mp4"
+      "destination": "https://media.w-i-z-z-lab-studios.com/junkz-landing.mp4"
     },
     {
       "source": "/test-media/smokey-space.mp4",
-      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/smokey-space.mp4"
+      "destination": "https://media.w-i-z-z-lab-studios.com/smokey-space.mp4"
     },
     {
       "source": "/test-media/junkz-game.mp4",
-      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/junkz-game.mp4"
+      "destination": "https://media.w-i-z-z-lab-studios.com/junkz-game.mp4"
     }
   ]
 }

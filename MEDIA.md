@@ -5,13 +5,13 @@ on the existing WIZZ Media/Caddy server, not in this repository or a Vercel buil
 
 | Book button | Clip | Hosted path |
 | --- | --- | --- |
-| Page 1 | Space Junkz gameplay | /book-space/junkz-game.mp4 |
-| Page 2 | Junkz landing | /book-space/junkz-landing.mp4 |
-| Page 3 | Smokey Space | /book-space/smokey-space.mp4 |
+| Page 1 | Space Junkz gameplay | /junkz-game.mp4 |
+| Page 2 | Junkz landing | /junkz-landing.mp4 |
+| Page 3 | Smokey Space | /smokey-space.mp4 |
 
 Media origin: https://media.w-i-z-z-lab-studios.com
 
-Server folder: E:\WIZZ-Server\media\book-space
+Server folder: E:\WIZZ-Server\media
 
 All three initial clips are eight-second H.264 MP4s, 1024 × 1368 at 25 fps.
 The combined size is 1,823,442 bytes. Keep copies of these masters on the server.

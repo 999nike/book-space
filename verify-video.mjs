@@ -8,9 +8,9 @@ assert.equal(kinds.filter(kind=>kind==="index").length,1,"exactly one index face
 assert.equal(kinds.filter(kind=>kind==="video").length,15,"every other inside face plays video");
 assert.equal(surfaces.at(-1).front,"index","index is the final inside face");
 assert.equal(surfaces.at(-2).back,"video","video faces the final index");
-assert.match(getSpreadVideo(1).url,/\/book-space\/junkz-game\.mp4$/);
-assert.match(getSpreadVideo(2).url,/\/book-space\/junkz-landing\.mp4$/);
-assert.match(getSpreadVideo(3).url,/\/book-space\/smokey-space\.mp4$/);
+assert.match(getSpreadVideo(1).url,/\/junkz-game\.mp4$/);
+assert.match(getSpreadVideo(2).url,/\/junkz-landing\.mp4$/);
+assert.match(getSpreadVideo(3).url,/\/smokey-space\.mp4$/);
 assert.equal(getSpreadVideo(4).id,"stars");
 class FakeVideo {
   constructor() { this.paused=true;this.readyState=0;this.videoWidth=1920;this.videoHeight=1080;this.events=new Map();this.loads=0;this.plays=0; }
