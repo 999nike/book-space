@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { atom, useSetAtom } from "jotai";
 import { SRGBColorSpace, VideoTexture } from "three";
-import { createVideoController } from "./video-controller";
+import { createVideoController, getPlaybackSources } from "./video-controller";
 import { STAR_VIDEO } from "./page-content";
-import { PAGE_ASPECT, SPREAD_ASPECT } from "./video-layout";
 
 export const videoStatusAtom = atom("idle");
 export const videoControllerAtom = atom(null);
 
-export function useHostedVideoTexture(active, clip = STAR_VIDEO, panoramic = true) {
+export function useHostedVideoTexture(active, clip = STAR_VIDEO) {
   const [readyTexture, setReadyTexture] = useState(null);
   const { url, fallback, backup } = clip;
   const [controller, setController] = useState(null);
@@ -28,7 +27,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, panoramic = tru
     document.body.appendChild(video);
     const map = new VideoTexture(video);
     map.colorSpace = SRGBColorSpace;
-    const player = createVideoController(video, map, setStatus, (ready) => setReadyTexture(ready ? { url, map } : null), { url, fallback, backup });
+    const player = createVideoController(video, map, setStatus, (ready) => setReadyTexture(ready ? { url, map } : null), getPlaybackSources({ url, fallback, backup }));
     setController(player);
     setSharedController(player);
     return () => {
@@ -39,11 +38,11 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, panoramic = tru
 
   useEffect(() => {
     if (!controller) return;
-    const sync = () => controller.update({ active, visible: !document.hidden, aspect: panoramic ? SPREAD_ASPECT : PAGE_ASPECT });
+    const sync = () => controller.update({ active, visible: !document.hidden });
     sync();
     document.addEventListener("visibilitychange", sync);
     return () => document.removeEventListener("visibilitychange", sync);
-  }, [controller, active, panoramic]);
+  }, [controller, active]);
 
   return readyTexture?.url === url ? readyTexture.map : null;
 }

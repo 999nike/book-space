@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { applyVideoPageUVs, getVideoCrop, PAGE_ASPECT, SPREAD_ASPECT } from "./src/components/video-layout.js";
+import { applyVideoPageUVs } from "./src/components/video-layout.js";
 
 const base = [0,0,1,0,0,1,1,1, 0,0,1,0,0,1,1,1];
 const originalUV = { getX: i => base[i*2], getY: i => base[i*2+1] };
@@ -28,13 +28,4 @@ assert.deepEqual(uv.array,base,"index and back cover keep full original UVs");
 applyVideoPageUVs(geometry, originalUV, {front:"video",back:"video"},false);
 assert.deepEqual(uv.array,base,"the video next to the final index uses one full page");
 
-const landscape=getVideoCrop(1920,1080);
-assert.ok(Math.abs(landscape.repeatX-SPREAD_ASPECT/(1920/1080))<1e-9);
-assert.equal(landscape.repeatY,1);
-const portrait=getVideoCrop(1024,1368);
-assert.equal(portrait.repeatX,1);
-assert.ok(Math.abs(portrait.repeatY-0.5)<1e-9,"portrait video crops consistently across the whole spread");
-assert.ok(Math.abs(portrait.offsetY-0.25)<1e-9);
-const full=getVideoCrop(1024,1368,PAGE_ASPECT);
-for(const [key,value] of Object.entries({repeatX:1,repeatY:1,offsetX:0,offsetY:0}))assert.ok(Math.abs(full[key]-value)<1e-9);
-console.log("PASS: one continuous video seam, correct left/right halves, no double mapping, unchanged covers/index/positions, aspect-preserving spread crop.");
+console.log("PASS: complete left/right frame, continuous seam, unchanged covers/index/positions, no repeated UV scaling.");

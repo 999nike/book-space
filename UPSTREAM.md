@@ -13,7 +13,7 @@ The original blank back-cover color texture uses the new repeating WIZZLABGAMES
 roughness map to retain its reflective lettering effect.
 
 The inside faces share one externally hosted video and one video decoder.
-The final inside face is a project index. No video files are committed here. The media player first requests the public WIZZ Media URL.
+The final inside face is a project index. No video files are committed here. The player uses the verified same-origin media route first to avoid a failed CORS request.
 If cross-origin loading fails, a fixed Vercel rewrite proxies that same clip
 for this test. This fallback sends video traffic through Vercel; it does not
 store the source video in Git. Remove the fallback after the media origin
@@ -28,4 +28,6 @@ A single decoder is replaced when the selected clip changes. If a project clip
 is unavailable, the existing star preview remains available and the controls
 offer Retry. The book geometry, materials and turning animation are unchanged.
 
-Videos now form one continuous picture across each two-page spread: the left face samples the left half, and the right face samples the right half, from one shared video texture and decoder. Only UV coordinates change; vertex positions, skin weights, bones, material settings and turn animation remain upstream. The spread uses aspect-preserving cover cropping. Portrait clips crop vertically; landscape footage suits the wider spread. The video beside the final index keeps its single-page framing.
+Videos now form one continuous picture across each two-page spread: the left face samples the left half, and the right face samples the right half, from one shared video texture and decoder. Only UV coordinates change; vertex positions, skin weights, bones, material settings and turn animation remain upstream. The complete video frame fills the spread without cropping or borders. Portrait input widens to fill the spread; landscape input best matches the shape. The video beside the final index keeps its single-page framing.
+
+Playback now starts with the verified same-origin media route. Videos stay on WIZZ Media; source files are not added to Git or the Vercel build. Material shader updates are skipped when the texture map has not changed.

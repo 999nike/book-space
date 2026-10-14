@@ -1,12 +1,16 @@
-import { getVideoCrop, SPREAD_ASPECT } from "./video-layout.js";
-
 export const HOSTED_VIDEO_URL = "https://media.w-i-z-z-lab-studios.com/space-junkz/background_video2.mp4";
 export const TEST_VIDEO_FALLBACK = "/test-media/background.mp4";
 
+// Use the already verified same-origin routes immediately, avoiding a failed CORS load.
+export function getPlaybackSources({ url, fallback, backup }) {
+  return fallback?.startsWith("/")
+    ? { url: fallback, fallback: url, backup }
+    : { url, fallback, backup };
+}
+
 // Owns only the video element. The book's geometry, materials and animation stay upstream.
-export function createVideoController(video, texture, onStatus, onReady, sources = { url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK }) {
+export function createVideoController(video, texture, onStatus, onReady, sources = getPlaybackSources({ url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK })) {
   let active = false, visible = true, paused = false, disposed = false;
-  let targetAspect = SPREAD_ASPECT;
   let attached = false, routeIndex = 0, failed = false, timer = null, attempt = 0;
   const routes = [sources.url, sources.fallback, sources.backup].filter(Boolean);
   const playingStatus = () => sources.backup && routeIndex === routes.length - 1 ? "placeholder" : "playing";
@@ -41,9 +45,9 @@ export function createVideoController(video, texture, onStatus, onReady, sources
     play();
   }
   const onMetadata = () => {
-    const crop = getVideoCrop(video.videoWidth, video.videoHeight, targetAspect);
-    texture.repeat.set(crop.repeatX, crop.repeatY);
-    texture.offset.set(crop.offsetX, crop.offsetY);
+    // Show every source pixel. The page geometry splits this full frame at the spine.
+    texture.repeat.set(1, 1);
+    texture.offset.set(0, 0);
   };
   const onData = () => {
     clearTimer();
@@ -69,7 +73,6 @@ export function createVideoController(video, texture, onStatus, onReady, sources
   return {
     update(next) {
       if (disposed) return;
-      if ("aspect" in next && next.aspect > 0) { targetAspect = next.aspect; onMetadata(); }
       if ("active" in next) active = next.active;
       if ("visible" in next) visible = next.visible;
       if (!active || !visible || paused) video.pause();

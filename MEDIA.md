@@ -22,4 +22,6 @@ provide same-origin access for the 3D video texture. The source stays on the med
 server; fallback traffic passes through Vercel. A missing clip falls back to the
 existing star preview. Retry or refresh the book after installing the files.
 
-Videos now form one continuous picture across each two-page spread: the left face samples the left half, and the right face samples the right half, from one shared video texture and decoder. Only UV coordinates change; vertex positions, skin weights, bones, material settings and turn animation remain upstream. The spread uses aspect-preserving cover cropping. Portrait clips crop vertically; landscape footage suits the wider spread. The video beside the final index keeps its single-page framing.
+Videos now form one continuous picture across each two-page spread: the left face samples the left half, and the right face samples the right half, from one shared video texture and decoder. Only UV coordinates change; vertex positions, skin weights, bones, material settings and turn animation remain upstream. The complete video frame fills the spread without cropping or borders. Portrait input widens to fill the spread; landscape input best matches the shape. The video beside the final index keeps its single-page framing.
+
+Playback now starts with the verified same-origin media route. Videos stay on WIZZ Media; source files are not added to Git or the Vercel build. Material shader updates are skipped when the texture map has not changed.

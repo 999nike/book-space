@@ -172,13 +172,14 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
   useEffect(() => {
     const content = getPageContent(number, pages.length);
     applyVideoPageUVs(manualSkinnedMesh.geometry, pageGeometry.attributes.uv, content, page !== pages.length - 1);
-    manualSkinnedMesh.material[4].map = content.front === "video"
+    const frontMap = content.front === "video"
       ? videoTexture || picture
       : content.front === "index" ? indexTexture || picture : picture;
-    manualSkinnedMesh.material[5].map = content.back === "video"
-      ? videoTexture || picture2 : picture2;
-    manualSkinnedMesh.material[4].needsUpdate = true;
-    manualSkinnedMesh.material[5].needsUpdate = true;
+    const backMap = content.back === "video" ? videoTexture || picture2 : picture2;
+    for (const [index, map] of [[4, frontMap], [5, backMap]]) {
+      const material = manualSkinnedMesh.material[index];
+      if (material.map !== map) { material.map = map; material.needsUpdate = true; }
+    }
   }, [manualSkinnedMesh, number, page, picture, picture2, videoTexture, indexTexture]);
 
   // useHelper(skinnedMeshRef, SkeletonHelper, "red");
@@ -286,7 +287,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
 export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
-  const videoTexture = useHostedVideoTexture(isBookOpen(delayedPage, pages.length), getSpreadVideo(delayedPage), delayedPage !== pages.length - 1);
+  const videoTexture = useHostedVideoTexture(isBookOpen(delayedPage, pages.length), getSpreadVideo(delayedPage));
   const indexTexture = useIndexPageTexture();
 
   useEffect(() => {
