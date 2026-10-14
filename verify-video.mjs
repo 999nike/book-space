@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createVideoController, getPlaybackSources, HOSTED_VIDEO_URL, TEST_VIDEO_FALLBACK } from "./src/components/video-controller.js";
-import { BOOK_SHEETS, getPageContent, getSpreadVideo, isBookOpen } from "./src/components/page-content.js";
+import { BOOK_SHEETS, getPageContent, getSpreadVideo, getSpreadProject, isBookOpen } from "./src/components/page-content.js";
 const surfaces=Array.from({length:BOOK_SHEETS},(_,number)=>getPageContent(number,BOOK_SHEETS));
 const kinds=surfaces.flatMap(surface=>[surface.front,surface.back]);
 assert.equal(kinds.filter(kind=>kind==="cover").length,2,"both branded covers remain static");
@@ -16,6 +16,9 @@ assert.match(getSpreadVideo(4).url,/\/universal-space\.mp4$/);
 assert.deepEqual(getSpreadVideo(1).clips.map(clip=>clip.id),["startscreenlvl1","m1boss","m7","scorpianboss","map-hangar"]);
 assert.match(getSpreadVideo(1).clips.at(-1).url,/\/map%20hangar\.mp4$/);
 assert.equal(getSpreadVideo(5).id,"stars");
+for(const page of [1,2,3]) assert.ok(getSpreadProject(page).href.startsWith("https://"),"known projects have clickable destinations");
+assert.equal(getSpreadProject(4).href,null,"Universal Space is information only");
+for(const name of ["Universal Space","Office","Code Space"]) assert.ok(getSpreadProject(4).info.includes(name),"information page names all three apps");
 class FakeVideo {
   constructor() { this.paused=true;this.readyState=0;this.videoWidth=1920;this.videoHeight=1080;this.events=new Map();this.loads=0;this.plays=0; }
   addEventListener(n,f){this.events.set(n,f);}

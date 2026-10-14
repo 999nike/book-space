@@ -273,8 +273,8 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
       }}
       onClick={(e) => {
         e.stopPropagation();
-        if (number === page && !bookClosed && e.face?.materialIndex === 4 && project?.href) {
-          window.open(project.href, "_blank", "noopener,noreferrer");
+        if (number === page && !bookClosed && e.face?.materialIndex === 4 && project) {
+          if (project.href) window.open(project.href, "_blank", "noopener,noreferrer");
         } else {
           setPage(opened ? number : number + 1);
         }

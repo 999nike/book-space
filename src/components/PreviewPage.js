@@ -3,7 +3,7 @@ import { CanvasTexture, SRGBColorSpace } from "three";
 
 export function usePreviewPageTexture(project) {
   const [ready, setReady] = useState(null);
-  const { preview, title, href } = project || {};
+  const { preview, title, href, info } = project || {};
   useEffect(() => {
     if (!preview) return;
     let cancelled = false, texture = null;
@@ -17,19 +17,33 @@ export function usePreviewPageTexture(project) {
       if (!ctx) return;
       ctx.fillStyle = "#090b18";
       ctx.fillRect(0, 0, 1024, 1368);
-      const bounds = { x: 80, y: 32, width: 904, height: 1180 };
+      const bounds = info ? { x: 80, y: 180, width: 904, height: 400 } : { x: 80, y: 32, width: 904, height: 1180 };
       const scale = Math.min(bounds.width / image.naturalWidth, bounds.height / image.naturalHeight);
       const width = image.naturalWidth * scale, height = image.naturalHeight * scale;
       ctx.drawImage(image, bounds.x + (bounds.width - width) / 2, bounds.y + (bounds.height - height) / 2, width, height);
       ctx.fillStyle = "#c5b5ff";
       ctx.font = "bold 24px Arial, sans-serif";
-      ctx.fillText(title.toUpperCase(), 90, 1260);
+      ctx.fillText(title.toUpperCase(), 90, info ? 110 : 1260);
       ctx.fillStyle = "#fff";
       ctx.font = "24px Arial, sans-serif";
-      ctx.fillText(href ? "OPEN WEBSITE  ↗" : "WEBSITE LINK COMING SOON", 90, 1310);
+      if (info) {
+        ctx.fillStyle = "#c5b5ff";
+        ctx.font = "bold 24px Arial, sans-serif";
+        ctx.fillText("THREE CONNECTED APPS", 90, 650);
+        ctx.fillStyle = "#fff";
+        info.split("\n").forEach((line, index) => {
+          ctx.font = ["Universal Space", "Office", "Code Space"].includes(line) ? "bold 29px Arial, sans-serif" : "26px Arial, sans-serif";
+          ctx.fillText(line, 90, 720 + index * 46);
+        });
+        ctx.fillStyle = "#c5b5ff";
+        ctx.font = "22px Arial, sans-serif";
+        ctx.fillText("WIZZ LAB STUDIOS  /  PROJECT NOTES", 90, 1310);
+      } else {
+        ctx.fillText("OPEN WEBSITE  ↗", 90, 1310);
+      }
       texture = new CanvasTexture(canvas);
       texture.colorSpace = SRGBColorSpace;
-      setReady({ preview, href, title, texture });
+      setReady({ preview, href, title, info, texture });
     };
     image.src = preview;
     return () => {
@@ -37,6 +51,6 @@ export function usePreviewPageTexture(project) {
       image.onload = null;
       texture?.dispose();
     };
-  }, [preview, title, href]);
-  return ready && ready.preview === preview && ready.href === href && ready.title === title ? ready.texture : null;
+  }, [preview, title, href, info]);
+  return ready && ready.preview === preview && ready.href === href && ready.title === title && ready.info === info ? ready.texture : null;
 }

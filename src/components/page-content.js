@@ -49,7 +49,7 @@ const spreadProjects = {
   1: { ...projects[0], preview: "/previews/junkz-game.jpg" },
   2: { ...projects[1], preview: "/previews/junkz-landing.jpg" },
   3: { ...projects[2], preview: "/previews/smokey-space.jpg" },
-  4: { title: "Universal Space", preview: "/previews/universal-space.jpg", href: null },
+  4: { title: "Universal Space", preview: "/previews/universal-space.jpg", href: null, info: "A connected bundle for online AI\nand agent building.\n\nUniversal Space\nYour hub for AI, projects and tools.\n\nOffice\nOrganise jobs and dispatch work to agents.\n\nCode Space\nBuild and edit AI tools and agent workflows." },
 };
 export function getSpreadProject(page) {
   return spreadProjects[page] || null;
