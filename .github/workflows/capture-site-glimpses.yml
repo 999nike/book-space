@@ -17,9 +17,11 @@ jobs:
         run: |
           npm install --prefix /tmp/book-capture playwright@1.62.0 --no-audit --no-fund
           /tmp/book-capture/node_modules/.bin/playwright install --with-deps chromium
+          sudo apt-get install -y ffmpeg
       - name: Record eight seconds of each public homepage
         run: node tools/capture-site-glimpses.cjs
       - name: Save the two MP4 clips and preview images
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: book-site-glimpses
