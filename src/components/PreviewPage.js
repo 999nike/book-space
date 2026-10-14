@@ -16,7 +16,11 @@ export function usePreviewPageTexture(project) {
       canvas.height = 1368;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      if (branding === "wizz") {
+      if (branding === "artwork") {
+        const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+        const width = image.naturalWidth * scale, height = image.naturalHeight * scale;
+        ctx.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+      } else if (branding === "wizz") {
         drawWizzBrand(ctx, image, edition);
       } else {
         ctx.fillStyle = "#090b18";

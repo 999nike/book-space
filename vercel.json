@@ -68,6 +68,18 @@
     {
       "source": "/project-art/space-junkz-title.png",
       "destination": "https://space-junkz-shooter.vercel.app/src/game/assets/menu/space-junkz-title.png"
+    },
+    {
+      "source": "/project-art/universal-space.png",
+      "destination": "https://media.w-i-z-z-lab-studios.com/Newaps/file_00000000293081f4a1735bc475241be2.png"
+    },
+    {
+      "source": "/project-art/junkz-landing.png",
+      "destination": "https://media.w-i-z-z-lab-studios.com/Newaps/file_000000004f5081f49c712f7738c6675c.png"
+    },
+    {
+      "source": "/project-art/smokeys-space.png",
+      "destination": "https://media.w-i-z-z-lab-studios.com/Newaps/file_00000000d9448243844a924913442343.png"
     }
   ]
 }
