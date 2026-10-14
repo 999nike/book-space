@@ -1,0 +1,32 @@
+name: Record two public site glimpses
+on:
+  push:
+    branches: [capture/site-glimpses]
+    paths: [.github/workflows/capture-site-glimpses.yml, tools/capture-site-glimpses.cjs]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install isolated browser capture tools
+        run: |
+          npm install --prefix /tmp/book-capture playwright@1.62.0 --no-audit --no-fund
+          /tmp/book-capture/node_modules/.bin/playwright install --with-deps chromium
+      - name: Record eight seconds of each public homepage
+        run: node tools/capture-site-glimpses.cjs
+      - name: Save the two MP4 clips and preview images
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-site-glimpses
+          path: |
+            capture-output/*.mp4
+            capture-output/*.png
+            capture-output/*-check.jpg
+            capture-output/capture-report.json
+          if-no-files-found: error
+          retention-days: 7
