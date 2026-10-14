@@ -32,6 +32,7 @@ const bookClip = (id, label, filename) => ({
   ...hostedClip(id, label),
   url: MEDIA_ORIGIN + "/book-space/" + encodeURIComponent(filename),
   fit: "page",
+  cropBottom: 0.10,
 });
 const junkzClips = [1, 3, 4, 5].map(number =>
   bookClip("junkz-" + number, "Space Junkz · Clip " + number, number + ".mp4")
