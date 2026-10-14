@@ -41,3 +41,12 @@ body {
 .book-page-select option { color: #fff; background: #171328; }
 .book-toolbar summary:focus-visible, .book-toolbar select:focus-visible, .book-controls-panel button:focus-visible, .book-controls-panel a:focus-visible { outline: 2px solid #c5b5ff; outline-offset: 3px; }
 @media (max-width: 600px) { .book-toolbar { font-size: 11px; } .book-controls summary, .book-page-select { padding: 8px 10px; } }
+
+.fullscreen-entry { width: min(380px, calc(100vw - 40px)); box-sizing: border-box; padding: 34px; border: 1px solid #a68eff55; border-radius: 20px; background: #151026; color: #fff; text-align: center; font: 14px Poppins, sans-serif; box-shadow: 0 25px 90px #0008; }
+.fullscreen-entry::backdrop { background: #090711b8; backdrop-filter: blur(9px); }
+.book-entry-brand { color: #c5b5ff; font-size: 10px; letter-spacing: .2em; }
+.fullscreen-entry h1 { margin: 16px 0 10px; font-size: 30px; font-weight: 600; }
+.fullscreen-entry p { margin: 0 0 24px; color: #c8bfd8; line-height: 1.6; }
+.fullscreen-entry button { display: block; width: 100%; padding: 13px 16px; border: 1px solid #c5b5ff; border-radius: 9px; background: #c5b5ff; color: #171027; font: 600 13px Poppins, sans-serif; cursor: pointer; }
+.fullscreen-entry .book-entry-window { margin-top: 9px; border-color: transparent; background: transparent; color: #c8bfd8; font-weight: 400; }
+.fullscreen-entry button:focus-visible { outline: 2px solid white; outline-offset: 4px; }

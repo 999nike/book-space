@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { FullscreenEntry, FullscreenToggle } from "./Fullscreen";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { playingClipAtom, videoControllerAtom, videoStatusAtom } from "./HostedVideo";
 
@@ -30,6 +31,7 @@ export const UI = () => {
 
   useEffect(() => {
     const onKey = (event) => {
+      if (document.querySelector("dialog[open]")) return;
       if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) return;
       if (event.key === "ArrowRight") { event.preventDefault(); setPage((value) => Math.min(pages.length, value + 1)); }
       if (event.key === "ArrowLeft") { event.preventDefault(); setPage((value) => Math.max(0, value - 1)); }
@@ -40,10 +42,12 @@ export const UI = () => {
 
   return (
     <main className="book-ui pointer-events-none select-none fixed inset-0 z-10 flex justify-end flex-col">
+      <FullscreenEntry />
       <div className="book-toolbar pointer-events-auto" aria-label="Book navigation">
         <details className="book-controls" onKeyDown={event => { if (event.key === "Escape") event.currentTarget.open = false; }}>
           <summary>Controls</summary>
           <div className="book-controls-panel">
+            <FullscreenToggle />
             {isBookOpen(playbackPage, pages.length) && <span role="status">{status === "loading" ? "Loading video…" : status === "error" ? "Video unavailable" : status === "placeholder" ? "Star preview" : currentClip.label}</span>}
             <button type="button" aria-label="Previous page" disabled={page === 0} onClick={() => setPage(value => Math.max(0, value - 1))}>← Previous</button>
             <button type="button" aria-label="Next page" disabled={page === pages.length} onClick={() => setPage(value => Math.min(pages.length, value + 1))}>Next →</button>
