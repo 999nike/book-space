@@ -22,8 +22,9 @@ import { degToRad } from "three/src/math/MathUtils.js";
 import { pageAtom, pages } from "./UI";
 import { useHostedVideoTexture } from "./HostedVideo";
 import { useIndexPageTexture } from "./IndexPage";
-import { getPageContent, getSpreadVideo, isBookOpen } from "./page-content";
+import { getPageContent, getSpreadProject, getSpreadVideo, isBookOpen } from "./page-content";
 import { applyVideoPageUVs } from "./video-layout";
+import { usePreviewPageTexture } from "./PreviewPage";
 
 const easingFactor = 0.5; 
 const easingFactorFold = 0.3; 
@@ -97,7 +98,7 @@ pages.forEach((page) => {
   useTexture.preload(`/textures/book-cover-roughness.jpg`);
 });
 
-const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, indexTexture, ...props }) => {
+const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, indexTexture, previewTexture, project, ...props }) => {
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -168,19 +169,20 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
     return mesh;
   }, []);
 
-  // Split one shared video at the spine; leave the cover and index UVs unchanged.
+  // Each face has its own content; the original cover and material effects stay intact.
   useEffect(() => {
     const content = getPageContent(number, pages.length);
-    applyVideoPageUVs(manualSkinnedMesh.geometry, pageGeometry.attributes.uv, content, page !== pages.length - 1);
+    applyVideoPageUVs(manualSkinnedMesh.geometry, pageGeometry.attributes.uv);
     const frontMap = content.front === "video"
       ? videoTexture || picture
+      : content.front === "preview" ? previewTexture || indexTexture || picture
       : content.front === "index" ? indexTexture || picture : picture;
     const backMap = content.back === "video" ? videoTexture || picture2 : picture2;
     for (const [index, map] of [[4, frontMap], [5, backMap]]) {
       const material = manualSkinnedMesh.material[index];
       if (material.map !== map) { material.map = map; material.needsUpdate = true; }
     }
-  }, [manualSkinnedMesh, number, page, picture, picture2, videoTexture, indexTexture]);
+  }, [manualSkinnedMesh, number, page, picture, picture2, videoTexture, indexTexture, previewTexture]);
 
   // useHelper(skinnedMeshRef, SkeletonHelper, "red");
 
@@ -271,7 +273,11 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
       }}
       onClick={(e) => {
         e.stopPropagation();
-        setPage(opened ? number : number + 1);
+        if (number === page && !bookClosed && e.face?.materialIndex === 4 && project?.href) {
+          window.open(project.href, "_blank", "noopener,noreferrer");
+        } else {
+          setPage(opened ? number : number + 1);
+        }
         setHighlighted(false);
       }}
     >
@@ -289,6 +295,8 @@ export const Book = ({ ...props }) => {
   const [delayedPage, setDelayedPage] = useState(page);
   const videoTexture = useHostedVideoTexture(isBookOpen(page, pages.length) && isBookOpen(delayedPage, pages.length), getSpreadVideo(page));
   const indexTexture = useIndexPageTexture();
+  const project = getSpreadProject(page);
+  const previewTexture = usePreviewPageTexture(project);
 
   useEffect(() => {
     let timeout;
@@ -325,6 +333,8 @@ export const Book = ({ ...props }) => {
           key={index}
           videoTexture={videoTexture}
           indexTexture={indexTexture}
+          previewTexture={previewTexture}
+          project={project}
           page={delayedPage}
           number={index}
           opened={delayedPage > index}

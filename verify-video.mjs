@@ -5,7 +5,8 @@ const surfaces=Array.from({length:BOOK_SHEETS},(_,number)=>getPageContent(number
 const kinds=surfaces.flatMap(surface=>[surface.front,surface.back]);
 assert.equal(kinds.filter(kind=>kind==="cover").length,2,"both branded covers remain static");
 assert.equal(kinds.filter(kind=>kind==="index").length,1,"exactly one index face");
-assert.equal(kinds.filter(kind=>kind==="video").length,15,"every other inside face plays video");
+assert.equal(kinds.filter(kind=>kind==="video").length,8,"every left inside face plays video");
+assert.equal(kinds.filter(kind=>kind==="preview").length,7,"right inside faces show site previews");
 assert.equal(surfaces.at(-1).front,"index","index is the final inside face");
 assert.equal(surfaces.at(-2).back,"video","video faces the final index");
 assert.match(getSpreadVideo(1).url,/\/startscreenlvl1\.mp4$/);
@@ -73,4 +74,4 @@ for(const clip of [...getSpreadVideo(1).clips,...[2,3,4].map(getSpreadVideo)]){
   player.retry();assert.equal(element.src,sources.url,"Retry checks the installed project file again");
   player.dispose();
 }
-console.log("PASS: four project spreads and five-clip Junkz playlist sources, server fallbacks and Retry; 15 video faces, final index, unchanged covers, one shared stream, playback, page/tab pause, fallback, retry, cleanup.");
+console.log("PASS: four project spreads and five-clip Junkz playlist sources, server fallbacks and Retry; 8 video faces and 7 previews, final index, unchanged covers, one shared stream, playback, page/tab pause, fallback, retry, cleanup.");

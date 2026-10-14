@@ -1,31 +1,17 @@
 import assert from "node:assert/strict";
-import { applyVideoPageUVs } from "./src/components/video-layout.js";
-
-const base = [0,0,1,0,0,1,1,1, 0,0,1,0,0,1,1,1];
-const originalUV = { getX: i => base[i*2], getY: i => base[i*2+1] };
-const positions = [0,0,0,1,0,0,0,1,0];
-const uv = { array: [...base], setXY(i,u,v){this.array[i*2]=u;this.array[i*2+1]=v;} };
-const indices = [0,1,2,2,1,3,4,5,6,6,5,7];
-const geometry = {
-  attributes: { uv, position: {array:positions} },
-  index: { getX: i => indices[i] },
-  groups: [{materialIndex:4,start:0,count:6},{materialIndex:5,start:6,count:6}],
-};
-applyVideoPageUVs(geometry, originalUV, {front:"video",back:"video"});
-assert.equal(uv.array[0],0.5,"right face starts at the middle of the video");
-assert.equal(uv.array[2],1,"right outer edge shows the right of the video");
-assert.equal(uv.array[8],0,"left outer edge shows the left of the video");
-assert.equal(uv.array[10],0.5,"left face ends at the middle of the video");
-assert.equal(uv.array[0],uv.array[10],"both pages meet at one continuous video seam");
-assert.deepEqual(positions,[0,0,0,1,0,0,0,1,0],"page positions are untouched");
-const once=[...uv.array];
-applyVideoPageUVs(geometry, originalUV, {front:"video",back:"video"});
-assert.deepEqual(uv.array,once,"indexed triangles and repeated updates never rescale the UVs twice");
-applyVideoPageUVs(geometry, originalUV, {front:"cover",back:"video"});
-assert.deepEqual(uv.array.slice(0,8),base.slice(0,8),"front cover keeps its full original UVs");
-applyVideoPageUVs(geometry, originalUV, {front:"index",back:"cover"});
-assert.deepEqual(uv.array,base,"index and back cover keep full original UVs");
-applyVideoPageUVs(geometry, originalUV, {front:"video",back:"video"},false);
-assert.deepEqual(uv.array,base,"the video next to the final index uses one full page");
-
-console.log("PASS: complete left/right frame, continuous seam, unchanged covers/index/positions, no repeated UV scaling.");
+import { applyVideoPageUVs, fitPageFrame } from "./src/components/video-layout.js";
+const base=[0,0,1,0,0,1,1,1];
+const uv={ count:4, array:[...base],setXY(i,u,v){this.array[i*2]=u;this.array[i*2+1]=v;} };
+const positions=[0,0,0,1,0,0];
+const geometry={attributes:{uv,position:{array:positions}}};
+const originalUV={getX:i=>base[i*2],getY:i=>base[i*2+1]};
+applyVideoPageUVs(geometry,originalUV);
+assert.deepEqual(uv.array,base,"both pages retain complete independent UVs");
+assert.deepEqual(positions,[0,0,0,1,0,0],"original page positions stay untouched");
+for(const [width,height] of [[1920,1080],[1024,1368],[1080,1920]]){
+ const frame=fitPageFrame(width,height,768,1026);
+ assert.ok(Math.abs(frame.width/frame.height-width/height)<1e-10,"landscape and portrait sources retain their full aspect ratio");
+ assert.ok(frame.x>=768*.04 && frame.x+frame.width<=768*.92+1e-8,"video stays outside the spine gutter");
+ assert.ok(frame.y>=0 && frame.y+frame.height<=1026,"the complete video stays on the page");
+}
+console.log("PASS: independent full-page UVs, original positions, complete landscape/portrait footage and spine gutter.");

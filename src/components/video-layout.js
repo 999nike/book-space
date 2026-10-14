@@ -1,15 +1,21 @@
-// Only UV coordinates change. Positions, skin weights and page-turn bones stay upstream.
-export function applyVideoPageUVs(geometry, originalUV, content, panoramic = true) {
+// Each face uses a complete frame. Positions, skin weights and page-turn bones stay upstream.
+export function applyVideoPageUVs(geometry, originalUV) {
   const uv = geometry.attributes.uv;
-  for (const group of geometry.groups) {
-    if (group.materialIndex !== 4 && group.materialIndex !== 5) continue;
-    const side = group.materialIndex === 4 ? "front" : "back";
-    const split = panoramic && content[side] === "video";
-    for (let index = group.start; index < group.start + group.count; index++) {
-      const vertex = geometry.index ? geometry.index.getX(index) : index;
-      const u = originalUV.getX(vertex);
-      uv.setXY(vertex, split ? u * 0.5 + (side === "front" ? 0.5 : 0) : u, originalUV.getY(vertex));
-    }
+  for (let i = 0; i < uv.count; i++) {
+    uv.setXY(i, originalUV.getX(i), originalUV.getY(i));
   }
   uv.needsUpdate = true;
+}
+
+// Contain the full source inside one page, leaving extra room next to the spine.
+export function fitPageFrame(sourceWidth, sourceHeight, width, height, side = "left") {
+  const left = width * (side === "left" ? 0.04 : 0.08);
+  const right = width * (side === "left" ? 0.08 : 0.04);
+  const top = height * 0.035;
+  const availableWidth = width - left - right;
+  const availableHeight = height - top * 2;
+  const scale = Math.min(availableWidth / sourceWidth, availableHeight / sourceHeight);
+  const frameWidth = sourceWidth * scale;
+  const frameHeight = sourceHeight * scale;
+  return { x: left + (availableWidth - frameWidth) / 2, y: top + (availableHeight - frameHeight) / 2, width: frameWidth, height: frameHeight };
 }

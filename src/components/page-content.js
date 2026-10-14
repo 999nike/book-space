@@ -11,7 +11,7 @@ export const projects = [
 // Each sheet has a front and a back; reserve only the final inside face for the index.
 export function getPageContent(number, total) {
   return {
-    front: number === 0 ? "cover" : number === total - 1 ? "index" : "video",
+    front: number === 0 ? "cover" : number === total - 1 ? "index" : "preview",
     back: number === total - 1 ? "cover" : "video",
   };
 }
@@ -43,4 +43,14 @@ const spreadVideos = {
 };
 export function getSpreadVideo(page) {
   return spreadVideos[page] || STAR_VIDEO;
+}
+
+const spreadProjects = {
+  1: { ...projects[0], preview: "/previews/junkz-game.jpg" },
+  2: { ...projects[1], preview: "/previews/junkz-landing.jpg" },
+  3: { ...projects[2], preview: "/previews/smokey-space.jpg" },
+  4: { title: "Universal Space", preview: "/previews/universal-space.jpg", href: null },
+};
+export function getSpreadProject(page) {
+  return spreadProjects[page] || null;
 }

@@ -19,4 +19,8 @@ Media origin: https://media.w-i-z-z-lab-studios.com
 
 Fixed same-origin Vercel rewrites provide access for the WebGL video texture because the media origin does not currently send cross-origin headers. Video storage remains on WIZZ Media; playback traffic passes through Vercel. Filenames containing spaces are URL encoded. Missing clips retain the existing star preview and Retry control.
 
-Each video fills one continuous two-page spread, including the entire source frame. Original page positions, skin weights, bones, material settings and turning animation remain unchanged. Only one video element and decoder exist; the selected clip loads without downloading intermediate pages during a jump. Hidden tabs and closed covers pause playback.
+Each spread now has a complete, uncropped video on the left and a static website preview on the right. The video is contained within a single page with a small spine gutter; wide footage is letterboxed instead of stretched. Portrait footage naturally fills more of the page. The video page canvas redraws only on decoded video frames (or time changes on older browsers), with mipmaps disabled.
+
+The right page opens the corresponding website in a new tab. A keyboard-accessible Visit site link provides the same action. Page controls and arrow keys still turn pages; covers, index, original geometry, bones, material shine and page-turn animation remain intact. Universal Space stays on Page4 uncut; its website link is pending the user-provided public URL.
+
+Small still-image previews are included in the app. All video originals remain on the media server. Only one video element and decoder exist; hidden tabs and closed covers pause playback.

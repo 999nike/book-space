@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { playingClipAtom, videoControllerAtom, videoStatusAtom } from "./HostedVideo";
 
-import { BOOK_SHEETS, getSpreadVideo, isBookOpen, projects } from "./page-content";
+import { BOOK_SHEETS, getSpreadProject, getSpreadVideo, isBookOpen, projects } from "./page-content";
 
 export const pageAtom = atom(0);
 export const pages = Array.from({ length: BOOK_SHEETS }, (_, number) => ({
@@ -14,6 +14,7 @@ export const UI = () => {
   const [page, setPage] = useAtom(pageAtom);
   const status = useAtomValue(videoStatusAtom);
   const clip = getSpreadVideo(page);
+  const project = getSpreadProject(page);
   const controller = useAtomValue(videoControllerAtom);
   const playingClip = useAtomValue(playingClipAtom);
   const currentClip = playingClip?.spreadId === clip.id ? playingClip : clip;
@@ -44,6 +45,7 @@ export const UI = () => {
             {(status === "playing" || status === "placeholder") ? "Pause" : "Play"}
           </button>
           {(status === "error" || status === "paused" || status === "placeholder") && <button type="button" onClick={() => controller?.retry()}>Retry</button>}
+          {project?.href && <a href={project.href} target="_blank" rel="noopener noreferrer">Visit site ↗</a>}
           <a href={currentClip.url} target="_blank" rel="noopener noreferrer">Open clip ↗</a>
         </div>
       )}

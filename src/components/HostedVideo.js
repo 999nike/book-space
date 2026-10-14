@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { atom, useSetAtom } from "jotai";
-import { SRGBColorSpace, VideoTexture } from "three";
+import { createPageVideoTexture } from "./PageVideoTexture";
 import { createVideoController, getPlaybackSources } from "./video-controller";
 import { STAR_VIDEO } from "./page-content";
 
@@ -35,8 +35,8 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO) {
     };
     video.addEventListener("ended", onEnded);
     document.body.appendChild(video);
-    const map = new VideoTexture(video);
-    map.colorSpace = SRGBColorSpace;
+    const pageVideo = createPageVideoTexture(video);
+    const map = pageVideo.texture;
     const player = createVideoController(video, map, setStatus, (ready) => setReadyTexture(ready ? { url, map } : null), getPlaybackSources({ url, fallback, backup }));
     setPlayingClip({ spreadId: clip.id, url, label: currentClip.label });
     setController(player);
@@ -45,6 +45,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO) {
       video.removeEventListener("ended", onEnded);
       setSharedController(null);
       setPlayingClip(null);
+      pageVideo.dispose();
       player.dispose();
     };
   }, [setSharedController, setStatus, setPlayingClip, clip.id, clipIndex, clipCount, currentClip.label, url, fallback, backup]);
