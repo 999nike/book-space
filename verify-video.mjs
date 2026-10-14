@@ -5,17 +5,16 @@ const surfaces=Array.from({length:BOOK_SHEETS},(_,number)=>getPageContent(number
 const kinds=surfaces.flatMap(surface=>[surface.front,surface.back]);
 assert.equal(kinds.filter(kind=>kind==="cover").length,2,"both branded covers remain static");
 assert.equal(kinds.filter(kind=>kind==="index").length,1,"exactly one index face");
-assert.equal(kinds.filter(kind=>kind==="video").length,17,"every other inside face plays video");
+assert.equal(kinds.filter(kind=>kind==="video").length,15,"every other inside face plays video");
 assert.equal(surfaces.at(-1).front,"index","index is the final inside face");
 assert.equal(surfaces.at(-2).back,"video","video faces the final index");
 assert.match(getSpreadVideo(1).url,/\/startscreenlvl1\.mp4$/);
 assert.match(getSpreadVideo(2).url,/\/junkz-landing\.mp4$/);
 assert.match(getSpreadVideo(3).url,/\/smokey-space\.mp4$/);
 assert.match(getSpreadVideo(4).url,/\/universal-space\.mp4$/);
-assert.match(getSpreadVideo(5).url,/\/map%20hangar\.mp4$/);
-assert.match(getSpreadVideo(6).url,/\/scorpianboss\.mp4$/);
-assert.match(getSpreadVideo(7).url,/\/m1boss\.mp4$/);
-assert.match(getSpreadVideo(8).url,/\/m7\.mp4$/);
+assert.deepEqual(getSpreadVideo(1).clips.map(clip=>clip.id),["startscreenlvl1","m1boss","m7","scorpianboss","map-hangar"]);
+assert.match(getSpreadVideo(1).clips.at(-1).url,/\/map%20hangar\.mp4$/);
+assert.equal(getSpreadVideo(5).id,"stars");
 class FakeVideo {
   constructor() { this.paused=true;this.readyState=0;this.videoWidth=1920;this.videoHeight=1080;this.events=new Map();this.loads=0;this.plays=0; }
   addEventListener(n,f){this.events.set(n,f);}
@@ -60,8 +59,8 @@ video.fire("error");assert.equal(states.at(-1),"error");
 controller.retry();assert.equal(video.src,TEST_VIDEO_FALLBACK);
 controller.dispose();assert.equal(texture.disposed,true);assert.equal(video.removed,true);assert.equal(video.events.size,0);
 assert.equal(video.src,undefined);
-for(const page of [1,2,3,4,5,6,7,8]){
-  const clip=getSpreadVideo(page), sources=getPlaybackSources(clip), element=new FakeVideo();
+for(const clip of [...getSpreadVideo(1).clips,...[2,3,4].map(getSpreadVideo)]){
+  const sources=getPlaybackSources(clip), element=new FakeVideo();
   assert.equal(sources.url,clip.fallback,"known working same-origin route loads first");
   const map={repeat:vector(),offset:vector(),dispose(){}};
   const clipStates=[];
@@ -74,4 +73,4 @@ for(const page of [1,2,3,4,5,6,7,8]){
   player.retry();assert.equal(element.src,sources.url,"Retry checks the installed project file again");
   player.dispose();
 }
-console.log("PASS: pages 1–8 sources, server fallbacks and Retry; 17 video faces, final index, unchanged covers, one shared stream, playback, page/tab pause, fallback, retry, cleanup.");
+console.log("PASS: four project spreads and five-clip Junkz playlist sources, server fallbacks and Retry; 15 video faces, final index, unchanged covers, one shared stream, playback, page/tab pause, fallback, retry, cleanup.");
