@@ -40,7 +40,7 @@ const spreadVideos = {
   1: { ...junkzClips[0], id: "junkz-showreel", label: "Space Junkz showreel", clips: junkzClips },
   2: bookClip("book-landing", "Junkz landing", "landing.mp4"),
   3: hostedClip("smokey-space", "Smokey Space"),
-  4: hostedClip("universal-space", "Universal Space"),
+  4: bookClip("book-universal", "Universal Space", "universal.mp4"),
 };
 export function getSpreadVideo(page) {
   return spreadVideos[page] || STAR_VIDEO;

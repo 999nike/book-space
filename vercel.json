@@ -60,6 +60,10 @@
     {
       "source": "/test-media/book-landing.mp4",
       "destination": "https://media.w-i-z-z-lab-studios.com/book-space/landing.mp4"
+    },
+    {
+      "source": "/test-media/book-universal.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/universal.mp4"
     }
   ]
 }

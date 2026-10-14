@@ -4,7 +4,8 @@ Video files stay on WIZZ Media, outside Git and the Vercel build.
 
 - Page 1: /book-space/1.mp4 → 3.mp4 → 4.mp4 → 5.mp4, repeating in that order.
 - Page 2: /book-space/landing.mp4.
-- Pages 3 and 4 retain the existing Smokey Space and full Universal Space videos.
+- Page 3 retains the existing Smokey Space video.
+- Page 4: /book-space/universal.mp4, complete original recording, filling the left page. The three-app information remains on the right.
 
 The new videos use cover fitting on the complete left page, with no borders or spine split. Aspect ratio is preserved; excess edges crop when the source and page ratios differ. Older clips retain their previous contained framing. Originals are unchanged.
 
