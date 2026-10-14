@@ -24,6 +24,7 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
   await page.goto('https://book-space-gold.vercel.app/',{waitUntil:'domcontentloaded',timeout:45000});
   await page.getByRole('button',{name:'Page 7',exact:true}).waitFor();
   await page.waitForTimeout(4000);
+  if(errors.length)throw Error(errors.join('; '));
   const results=[];
   const waitForClip=async id=>{
    await page.waitForFunction(id=>{
@@ -97,5 +98,5 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
   const report={previewPageClick:true,siteLinks:true,results,playlistResults,playlistLoops:true,indexLinks:3,backCoverPaused:true,oneDecoder:true,noIntermediateClipDownloads:true,pageErrors:errors};
   await fs.writeFile('book-playback-report.json',JSON.stringify(report,null,2));
   console.log('BOOK_RESULT '+JSON.stringify(report));
- }finally{await browser.close();}
+ }catch(error){console.error('BOOK_PAGE_ERRORS '+JSON.stringify(errors));throw error;}finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
