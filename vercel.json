@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/test-media/background.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/space-junkz/background_video2.mp4"
+    }
+  ]
+}

@@ -16,3 +16,9 @@ body {
 .outline-text {
   -webkit-text-stroke: 1px white;
 }
+
+.video-controls { position: absolute; top: 24px; right: 24px; display: flex; align-items: center; gap: 10px; color: #fff; font: 12px Poppins, sans-serif; padding: 10px 14px; border: 1px solid #ffffff26; border-radius: 12px; background: #141224aa; backdrop-filter: blur(12px); }
+.video-controls button, .video-controls a { padding: 7px 10px; border: 1px solid #ffffff33; border-radius: 7px; color: #fff; background: #ffffff0d; text-decoration: none; cursor: pointer; }
+.video-controls button:disabled { opacity: .45; cursor: default; }
+.video-controls button:focus-visible, .video-controls a:focus-visible { outline: 2px solid #b8a5ff; outline-offset: 3px; }
+@media (max-width: 600px) { .video-controls { top: 16px; right: 16px; left: 16px; font-size: 10px; justify-content: center; flex-wrap: wrap; } .book-ui nav > div { gap: 8px; padding: 20px 12px; } .book-ui nav button { font-size: 11px; padding: 10px 13px; } }

@@ -1,11 +1,22 @@
 # Original project and credits
 
-This repository contains the original source and assets from
-[pakagronglb/animated-book-slider-threejs](https://github.com/pakagronglb/animated-book-slider-threejs),
-by Pakagrong Lebel, copied from commit 3dd1a49855e7f74f4a2b86c705910d7284cc5c52.
-
-All 41 upstream files, including the original README, are preserved unchanged.
+Based on [pakagronglb/animated-book-slider-threejs](https://github.com/pakagronglb/animated-book-slider-threejs)
+by Pakagrong Lebel, starting at commit 3dd1a49855e7f74f4a2b86c705910d7284cc5c52.
 The upstream author credits [Wawa Sensei](https://www.youtube.com/watch?v=b7a_Y1Ja6js)
 and the [React Three Fiber course](https://lessons.wawasensei.dev/course).
+The original README and attribution are retained.
 
-This is the original demo for inspection before adding showroom videos.
+The book geometry, skeleton, turning animation, original material settings,
+camera, floating motion, environment and lights are preserved. Cover artwork
+and the shared roughness texture now carry WIZZ LAB STUDIOS branding.
+The original blank back-cover color texture uses the new repeating WIZZLABGAMES
+roughness map to retain its reflective lettering effect.
+
+The first inside page tests an externally hosted video. No video files are
+committed here. The media player first requests the public WIZZ Media URL.
+If cross-origin loading fails, a fixed Vercel rewrite proxies that same clip
+for this test. This fallback sends video traffic through Vercel; it does not
+store the source video in Git. Remove the fallback after the media origin
+allows cross-origin requests from the production book domain.
+
+Cover artwork was edited with the built-in ImageGen tool; see COVER-ASSETS.md.

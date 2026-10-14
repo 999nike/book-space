@@ -1,0 +1,39 @@
+import assert from "node:assert/strict";
+import { createVideoController, HOSTED_VIDEO_URL, TEST_VIDEO_FALLBACK } from "./src/components/video-controller.js";
+class FakeVideo {
+  constructor() { this.paused=true;this.readyState=0;this.videoWidth=1920;this.videoHeight=1080;this.events=new Map();this.loads=0;this.plays=0; }
+  addEventListener(n,f){this.events.set(n,f);}
+  removeEventListener(n,f){if(this.events.get(n)===f)this.events.delete(n);}
+  fire(n){this.events.get(n)?.();}
+  play(){this.paused=false;this.plays++;this.fire("playing");return Promise.resolve();}
+  pause(){if(!this.paused){this.paused=true;this.fire("pause");}}
+  load(){this.loads++;}
+  removeAttribute(n){delete this[n];}
+  remove(){this.removed=true;}
+}
+const video=new FakeVideo();
+const vector=()=>({x:1,y:1,set(x,y){this.x=x;this.y=y;}});
+const texture={repeat:vector(),offset:vector(),dispose(){this.disposed=true;}};
+const states=[],ready=[];
+const controller=createVideoController(video,texture,s=>states.push(s),r=>ready.push(r));
+assert.equal(video.src,undefined,"cover does not fetch a video");
+controller.update({active:true,visible:true});
+assert.equal(video.src,HOSTED_VIDEO_URL);
+await Promise.resolve();
+assert.equal(video.paused,false);
+video.readyState=4;video.fire("loadedmetadata");video.fire("loadeddata");
+assert.equal(ready.at(-1),true);
+assert.ok(Math.abs(texture.repeat.x-(1.28/1.71)/(1920/1080))<0.00001,"crop preserves video aspect");
+controller.update({active:false});assert.equal(video.paused,true,"turned pages pause");
+controller.update({active:true});assert.equal(video.paused,false,"visible page resumes");
+controller.toggle();assert.equal(video.paused,true);
+controller.update({visible:false});controller.update({visible:true});assert.equal(video.paused,true,"user pause survives visibility changes");
+controller.toggle();assert.equal(video.paused,false);
+controller.update({visible:false});assert.equal(video.paused,true,"hidden tab pauses");
+controller.update({visible:true});assert.equal(video.paused,false);
+video.readyState=0;video.fire("error");assert.equal(video.src,TEST_VIDEO_FALLBACK,"failed cross-origin route uses fixed test proxy");
+video.fire("error");assert.equal(states.at(-1),"error");
+controller.retry();assert.equal(video.src,HOSTED_VIDEO_URL);
+controller.dispose();assert.equal(texture.disposed,true);assert.equal(video.removed,true);assert.equal(video.events.size,0);
+assert.equal(video.src,undefined);
+console.log("PASS: lazy video loading, playback, page/tab pause, user pause, aspect crop, fallback, retry, cleanup.");
