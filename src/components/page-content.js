@@ -28,16 +28,17 @@ const hostedClip = (id, label, filename = id + ".mp4") => ({
   fallback: "/test-media/" + id + ".mp4",
   backup: TEST_VIDEO_FALLBACK,
 });
-const junkzClips = [
-  hostedClip("startscreenlvl1", "Space Junkz · Start screen & level 1"),
-  hostedClip("m1boss", "Space Junkz · M1 boss"),
-  hostedClip("m7", "Space Junkz · M7"),
-  hostedClip("scorpianboss", "Space Junkz · Scorpion boss"),
-  hostedClip("map-hangar", "Space Junkz · Map & hangar", "map hangar.mp4"),
-];
+const bookClip = (id, label, filename) => ({
+  ...hostedClip(id, label),
+  url: MEDIA_ORIGIN + "/book-space/" + encodeURIComponent(filename),
+  fit: "cover",
+});
+const junkzClips = [1, 3, 4, 5].map(number =>
+  bookClip("junkz-" + number, "Space Junkz · Clip " + number, number + ".mp4")
+);
 const spreadVideos = {
   1: { ...junkzClips[0], id: "junkz-showreel", label: "Space Junkz showreel", clips: junkzClips },
-  2: hostedClip("junkz-landing", "Junkz landing"),
+  2: bookClip("book-landing", "Junkz landing", "landing.mp4"),
   3: hostedClip("smokey-space", "Smokey Space"),
   4: hostedClip("universal-space", "Universal Space"),
 };
@@ -46,8 +47,8 @@ export function getSpreadVideo(page) {
 }
 
 const spreadProjects = {
-  1: { ...projects[0], preview: "/previews/junkz-game.jpg" },
-  2: { ...projects[1], preview: "/previews/junkz-landing.jpg" },
+  1: { ...projects[0], branding: "junkz", edition: "THE GAME", linkLabel: "Play Space Junkz ↗" },
+  2: { ...projects[1], branding: "junkz", edition: "THE LANDING PAGE", linkLabel: "Visit Junkz ↗" },
   3: { ...projects[2], preview: "/previews/smokey-space.jpg" },
   4: { title: "Universal Space", preview: "/previews/universal-space.jpg", href: null, info: "A connected bundle for online AI\nand agent building.\n\nUniversal Space\nYour hub for AI, projects and tools.\n\nOffice\nOrganise jobs and dispatch work to agents.\n\nCode Space\nBuild and edit AI tools and agent workflows." },
 };

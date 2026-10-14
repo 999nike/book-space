@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useCursor, useTexture } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { Html, useCursor, useTexture } from "@react-three/drei";
+import { createPortal, useFrame } from "@react-three/fiber";
 
 import { useAtom } from "jotai";
 import { easing } from "maath";
@@ -98,7 +98,7 @@ pages.forEach((page) => {
   useTexture.preload(`/textures/book-cover-roughness.jpg`);
 });
 
-const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, indexTexture, previewTexture, ...props }) => {
+const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, indexTexture, previewTexture, project, ...props }) => {
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -282,6 +282,16 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
         ref={skinnedMeshRef}
         position-z={-number * PAGE_DEPTH + page * PAGE_DEPTH}
       />
+      {number === page && !bookClosed && project?.branding === "junkz" && project.href && createPortal(
+        <Html transform center position={[0, -0.42, 0.014]} distanceFactor={1.65} zIndexRange={[9, 0]}>
+          <a className="book-page-website" href={project.href} target="_blank" rel="noopener noreferrer"
+            onPointerDown={event => event.stopPropagation()} onClick={event => event.stopPropagation()}>
+            {project.linkLabel}
+          </a>
+        </Html>,
+        manualSkinnedMesh.skeleton.bones[15]
+      )}
+
     </group>
   );
 };
@@ -330,6 +340,7 @@ export const Book = ({ ...props }) => {
           videoTexture={videoTexture}
           indexTexture={indexTexture}
           previewTexture={previewTexture}
+          project={delayedPage === page ? project : null}
           page={delayedPage}
           number={index}
           opened={delayedPage > index}

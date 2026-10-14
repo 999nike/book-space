@@ -1,7 +1,7 @@
 import { CanvasTexture, LinearFilter, SRGBColorSpace } from "three";
 import { fitPageFrame } from "./video-layout";
 
-export function createPageVideoTexture(video) {
+export function createPageVideoTexture(video, { fit = "contain" } = {}) {
   const canvas = document.createElement("canvas");
   canvas.width = 768;
   canvas.height = 1026;
@@ -13,7 +13,7 @@ export function createPageVideoTexture(video) {
   let disposed = false, frameHandle = null, lastTime = -1;
   const draw = () => {
     if (disposed || !ctx || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return;
-    const frame = fitPageFrame(video.videoWidth, video.videoHeight, canvas.width, canvas.height);
+    const frame = fitPageFrame(video.videoWidth, video.videoHeight, canvas.width, canvas.height, "left", fit);
     ctx.fillStyle = "#090b18";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(video, frame.x, frame.y, frame.width, frame.height);

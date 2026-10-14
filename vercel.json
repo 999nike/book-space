@@ -40,6 +40,26 @@
     {
       "source": "/test-media/m7.mp4",
       "destination": "https://media.w-i-z-z-lab-studios.com/m7.mp4"
+    },
+    {
+      "source": "/test-media/junkz-1.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/1.mp4"
+    },
+    {
+      "source": "/test-media/junkz-3.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/3.mp4"
+    },
+    {
+      "source": "/test-media/junkz-4.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/4.mp4"
+    },
+    {
+      "source": "/test-media/junkz-5.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/5.mp4"
+    },
+    {
+      "source": "/test-media/book-landing.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/landing.mp4"
     }
   ]
 }
