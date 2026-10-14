@@ -1,0 +1,32 @@
+name: Render smooth landscape website previews
+on:
+  push:
+    branches: [capture/site-glimpses]
+    paths: [.github/workflows/render-smooth-previews.yml, tools/render-smooth-previews.cjs]
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install capture tools
+        run: |
+          npm install --prefix /tmp/book-capture playwright@1.62.0 --no-audit --no-fund
+          /tmp/book-capture/node_modules/.bin/playwright install --with-deps chromium
+          sudo apt-get install -y ffmpeg
+      - name: Render every frame of both landscape previews
+        run: node tools/render-smooth-previews.cjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: smooth-landscape-previews
+          path: |
+            quality-output/*.mp4
+            quality-output/*-check.jpg
+            quality-output/*-report.json
+          if-no-files-found: warn
+          retention-days: 7
