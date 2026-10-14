@@ -12,8 +12,8 @@ and the shared roughness texture now carry WIZZ LAB STUDIOS branding.
 The original blank back-cover color texture uses the new repeating WIZZLABGAMES
 roughness map to retain its reflective lettering effect.
 
-The first inside page tests an externally hosted video. No video files are
-committed here. The media player first requests the public WIZZ Media URL.
+The inside faces share one externally hosted video and one video decoder.
+The final inside face is a project index. No video files are committed here. The media player first requests the public WIZZ Media URL.
 If cross-origin loading fails, a fixed Vercel rewrite proxies that same clip
 for this test. This fallback sends video traffic through Vercel; it does not
 store the source video in Git. Remove the fallback after the media origin

@@ -21,6 +21,8 @@ import { degToRad } from "three/src/math/MathUtils.js";
 
 import { pageAtom, pages } from "./UI";
 import { useHostedVideoTexture } from "./HostedVideo";
+import { useIndexPageTexture } from "./IndexPage";
+import { getPageContent, isBookOpen } from "./page-content";
 
 const easingFactor = 0.5; 
 const easingFactorFold = 0.3; 
@@ -94,7 +96,7 @@ pages.forEach((page) => {
   useTexture.preload(`/textures/book-cover-roughness.jpg`);
 });
 
-const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ...props }) => {
+const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, indexTexture, ...props }) => {
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -163,11 +165,17 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ...
     return mesh;
   }, []);
 
-  // Change only the first inside page's image map when the external video is ready.
+  // Share a single decoded video across inside faces; preserve both cover materials.
   useEffect(() => {
-    manualSkinnedMesh.material[5].map = videoTexture || picture2;
+    const content = getPageContent(number, pages.length);
+    manualSkinnedMesh.material[4].map = content.front === "video"
+      ? videoTexture || picture
+      : content.front === "index" ? indexTexture || picture : picture;
+    manualSkinnedMesh.material[5].map = content.back === "video"
+      ? videoTexture || picture2 : picture2;
+    manualSkinnedMesh.material[4].needsUpdate = true;
     manualSkinnedMesh.material[5].needsUpdate = true;
-  }, [manualSkinnedMesh, picture2, videoTexture]);
+  }, [manualSkinnedMesh, number, picture, picture2, videoTexture, indexTexture]);
 
   // useHelper(skinnedMeshRef, SkeletonHelper, "red");
 
@@ -271,16 +279,11 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ...
   );
 };
 
-const FirstVideoPage = (props) => {
-  const videoTexture = useHostedVideoTexture(props.page === 1);
-  return <Page {...props} videoTexture={videoTexture} />;
-};
-
-const PageSlot = (props) => props.number === 0 ? <FirstVideoPage {...props} /> : <Page {...props} />;
-
 export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
+  const videoTexture = useHostedVideoTexture(isBookOpen(delayedPage, pages.length));
+  const indexTexture = useIndexPageTexture();
 
   useEffect(() => {
     let timeout;
@@ -313,8 +316,10 @@ export const Book = ({ ...props }) => {
   return (
     <group {...props} rotation-y={-Math.PI / 2}>
       {[...pages].map((pageData, index) => (
-        <PageSlot
+        <Page
           key={index}
+          videoTexture={videoTexture}
+          indexTexture={indexTexture}
           page={delayedPage}
           number={index}
           opened={delayedPage > index}

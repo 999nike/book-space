@@ -22,3 +22,10 @@ body {
 .video-controls button:disabled { opacity: .45; cursor: default; }
 .video-controls button:focus-visible, .video-controls a:focus-visible { outline: 2px solid #b8a5ff; outline-offset: 3px; }
 @media (max-width: 600px) { .video-controls { top: 16px; right: 16px; left: 16px; font-size: 10px; justify-content: center; flex-wrap: wrap; } .book-ui nav > div { gap: 8px; padding: 20px 12px; } .book-ui nav button { font-size: 11px; padding: 10px 13px; } }
+
+.project-index { position: absolute; top: 90px; right: 24px; width: 240px; padding: 16px; border: 1px solid #ffffff26; border-radius: 12px; background: #141224e8; backdrop-filter: blur(12px); color: white; font: 12px Poppins, sans-serif; }
+.index-label { display: block; color: #c5b5ff; font-size: 10px; letter-spacing: .18em; margin-bottom: 8px; }
+.project-index a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid #ffffff20; color: white; text-decoration: none; }
+.project-index a:hover { color: #c5b5ff; }
+.project-index a:focus-visible { outline: 2px solid #b8a5ff; outline-offset: 3px; }
+@media (max-width: 600px) { .project-index { top: 112px; right: 16px; width: 190px; padding: 12px; } .project-index a { padding: 9px 0; } }

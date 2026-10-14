@@ -1,5 +1,13 @@
 import assert from "node:assert/strict";
 import { createVideoController, HOSTED_VIDEO_URL, TEST_VIDEO_FALLBACK } from "./src/components/video-controller.js";
+import { BOOK_SHEETS, getPageContent, isBookOpen } from "./src/components/page-content.js";
+const surfaces=Array.from({length:BOOK_SHEETS},(_,number)=>getPageContent(number,BOOK_SHEETS));
+const kinds=surfaces.flatMap(surface=>[surface.front,surface.back]);
+assert.equal(kinds.filter(kind=>kind==="cover").length,2,"both branded covers remain static");
+assert.equal(kinds.filter(kind=>kind==="index").length,1,"exactly one index face");
+assert.equal(kinds.filter(kind=>kind==="video").length,15,"every other inside face plays video");
+assert.equal(surfaces.at(-1).front,"index","index is the final inside face");
+assert.equal(surfaces.at(-2).back,"video","video faces the final index");
 class FakeVideo {
   constructor() { this.paused=true;this.readyState=0;this.videoWidth=1920;this.videoHeight=1080;this.events=new Map();this.loads=0;this.plays=0; }
   addEventListener(n,f){this.events.set(n,f);}
@@ -31,9 +39,14 @@ controller.update({visible:false});controller.update({visible:true});assert.equa
 controller.toggle();assert.equal(video.paused,false);
 controller.update({visible:false});assert.equal(video.paused,true,"hidden tab pauses");
 controller.update({visible:true});assert.equal(video.paused,false);
+for(let spread=1;spread<BOOK_SHEETS;spread++){controller.update({active:isBookOpen(spread,BOOK_SHEETS)});assert.equal(video.paused,false,"video stays playing across spreads");}
+assert.equal(video.loads,1,"page turns reuse one stream");
+controller.update({active:isBookOpen(BOOK_SHEETS,BOOK_SHEETS)});assert.equal(video.paused,true,"back cover pauses playback");
+controller.update({active:isBookOpen(0,BOOK_SHEETS)});assert.equal(video.paused,true,"front cover pauses playback");
+controller.update({active:isBookOpen(1,BOOK_SHEETS)});assert.equal(video.loads,1,"reopening resumes without reloading");
 video.readyState=0;video.fire("error");assert.equal(video.src,TEST_VIDEO_FALLBACK,"failed cross-origin route uses fixed test proxy");
 video.fire("error");assert.equal(states.at(-1),"error");
 controller.retry();assert.equal(video.src,HOSTED_VIDEO_URL);
 controller.dispose();assert.equal(texture.disposed,true);assert.equal(video.removed,true);assert.equal(video.events.size,0);
 assert.equal(video.src,undefined);
-console.log("PASS: lazy video loading, playback, page/tab pause, user pause, aspect crop, fallback, retry, cleanup.");
+console.log("PASS: 15 video faces, final index, unchanged covers, one shared stream, playback, page/tab pause, fallback, retry, cleanup.");
