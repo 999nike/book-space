@@ -39,7 +39,7 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
   for(const [index,id] of playlist.entries()){
    const state=await waitForClip(id);
    if(state.loop)throw Error('Playlist clips must advance on ended');
-   const link=await page.locator('.video-controls a').getAttribute('href');
+   const link=await page.getByRole('link',{name:'Open clip'}).getAttribute('href');
    const file=id==='map-hangar'?'map%20hangar':id;
    if(!link.endsWith('/'+file+'.mp4'))throw Error('Open clip link is out of date');
    playlistResults.push({id,...state});
@@ -50,6 +50,7 @@ const {chromium}=require('/tmp/book-capture/node_modules/playwright');
   for(const number of [1,2,3,4]){
    await page.getByRole('button',{name:'Page '+number,exact:true}).click();
    const state=await waitForClip(clips[number-1][0]);
+   if(number===4&&await page.getByRole('link',{name:'Visit site'}).count()!==0)throw Error('Universal Space is an information page, with no website link');
    if(number===4&&(state.duration<90||!state.loop))throw Error('Universal Space must loop the entire original');
    const initial=await page.locator('video').evaluate(v=>({time:v.currentTime,frames:v.getVideoPlaybackQuality().totalVideoFrames}));
    await page.waitForFunction(initial=>{
