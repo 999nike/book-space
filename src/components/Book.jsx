@@ -287,7 +287,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
 export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
-  const videoTexture = useHostedVideoTexture(isBookOpen(delayedPage, pages.length), getSpreadVideo(delayedPage));
+  const videoTexture = useHostedVideoTexture(isBookOpen(page, pages.length) && isBookOpen(delayedPage, pages.length), getSpreadVideo(page));
   const indexTexture = useIndexPageTexture();
 
   useEffect(() => {

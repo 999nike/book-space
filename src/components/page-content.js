@@ -1,6 +1,6 @@
 import { HOSTED_VIDEO_URL, TEST_VIDEO_FALLBACK } from "./video-controller.js";
 
-export const BOOK_SHEETS = 9;
+export const BOOK_SHEETS = 10;
 
 export const projects = [
   { title: "Space Junkz", detail: "PLAY THE GAME", href: "https://space-junkz-shooter.vercel.app/game.html" },
@@ -21,10 +21,22 @@ export function isBookOpen(page, total) {
 
 const MEDIA_ORIGIN = "https://media.w-i-z-z-lab-studios.com";
 export const STAR_VIDEO = { id: "stars", label: "Star book video", url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK };
+const hostedClip = (id, label, filename = id + ".mp4") => ({
+  id,
+  label,
+  url: MEDIA_ORIGIN + "/" + encodeURIComponent(filename),
+  fallback: "/test-media/" + id + ".mp4",
+  backup: TEST_VIDEO_FALLBACK,
+});
 const spreadVideos = {
-  1: { id: "junkz-game", label: "Space Junkz gameplay", url: MEDIA_ORIGIN + "/junkz-game.mp4", fallback: "/test-media/junkz-game.mp4", backup: TEST_VIDEO_FALLBACK },
-  2: { id: "junkz-landing", label: "Junkz landing", url: MEDIA_ORIGIN + "/junkz-landing.mp4", fallback: "/test-media/junkz-landing.mp4", backup: TEST_VIDEO_FALLBACK },
-  3: { id: "smokey-space", label: "Smokey Space", url: MEDIA_ORIGIN + "/smokey-space.mp4", fallback: "/test-media/smokey-space.mp4", backup: TEST_VIDEO_FALLBACK },
+  1: hostedClip("startscreenlvl1", "Space Junkz · Start screen & level 1"),
+  2: hostedClip("junkz-landing", "Junkz landing"),
+  3: hostedClip("smokey-space", "Smokey Space"),
+  4: hostedClip("universal-space", "Universal Space"),
+  5: hostedClip("map-hangar", "Space Junkz · Map & hangar", "map hangar.mp4"),
+  6: hostedClip("scorpianboss", "Space Junkz · Scorpion boss"),
+  7: hostedClip("m1boss", "Space Junkz · M1 boss"),
+  8: hostedClip("m7", "Space Junkz · M7"),
 };
 export function getSpreadVideo(page) {
   return spreadVideos[page] || STAR_VIDEO;
