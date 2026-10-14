@@ -64,6 +64,10 @@
     {
       "source": "/test-media/book-universal.mp4",
       "destination": "https://media.w-i-z-z-lab-studios.com/book-space/universal.mp4"
+    },
+    {
+      "source": "/project-art/space-junkz-title.png",
+      "destination": "https://space-junkz-shooter.vercel.app/src/game/assets/menu/space-junkz-title.png"
     }
   ]
 }

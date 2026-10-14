@@ -47,7 +47,7 @@ export function getSpreadVideo(page) {
 }
 
 const spreadProjects = {
-  1: { ...projects[0], branding: "wizz", preview: "/images/wizzlab-logo.png", edition: "SPACE JUNKZ SHOOTER" },
+  1: { ...projects[0], branding: "wizz", preview: "/project-art/space-junkz-title.png", edition: "SPACE JUNKZ SHOOTER" },
   2: { ...projects[1], branding: "wizz", preview: "/images/wizzlab-logo.png", edition: "JUNKZ LANDING PAGE" },
   3: { ...projects[2], preview: "/previews/smokey-space.jpg" },
   4: { title: "Universal Space", branding: "wizz", preview: "/images/wizzlab-logo.png", edition: "UNIVERSAL SPACE", href: null },
