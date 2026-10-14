@@ -2,9 +2,11 @@ export const HOSTED_VIDEO_URL = "https://media.w-i-z-z-lab-studios.com/space-jun
 export const TEST_VIDEO_FALLBACK = "/test-media/background.mp4";
 
 // Owns only the video element. The book's geometry, materials and animation stay upstream.
-export function createVideoController(video, texture, onStatus, onReady) {
+export function createVideoController(video, texture, onStatus, onReady, sources = { url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK }) {
   let active = false, visible = true, paused = false, disposed = false;
-  let attached = false, fallback = false, failed = false, timer = null, attempt = 0;
+  let attached = false, routeIndex = 0, failed = false, timer = null, attempt = 0;
+  const routes = [sources.url, sources.fallback, sources.backup].filter(Boolean);
+  const playingStatus = () => sources.backup && routeIndex === routes.length - 1 ? "placeholder" : "playing";
   const canPlay = () => active && visible && !paused && !disposed && !failed;
   const clearTimer = () => { if (timer !== null) clearTimeout(timer); timer = null; };
   const status = (value) => { if (!disposed) onStatus(value); };
@@ -13,26 +15,26 @@ export function createVideoController(video, texture, onStatus, onReady) {
     if (!canPlay()) return;
     const currentAttempt = attempt;
     video.play().then(() => {
-      if (!disposed && currentAttempt === attempt && canPlay()) status("playing");
+      if (!disposed && currentAttempt === attempt && canPlay()) status(playingStatus());
     }).catch((error) => {
       if (!disposed && currentAttempt === attempt && canPlay() && error.name !== "AbortError") status("paused");
     });
   }
-  function load(useFallback) {
+  function load(index = 0) {
     clearTimer();
-    fallback = useFallback;
+    routeIndex = index;
     attached = true;
     failed = false;
     attempt += 1;
     onReady(false);
     status("loading");
-    video.src = fallback ? TEST_VIDEO_FALLBACK : HOSTED_VIDEO_URL;
+    video.src = routes[routeIndex];
     video.load();
     timer = setTimeout(() => {
       if (disposed || video.readyState >= 2) return;
-      if (!fallback) load(true);
+      if (routeIndex + 1 < routes.length) load(routeIndex + 1);
       else { failed = true; video.pause(); status("error"); }
-    }, fallback ? 20000 : 10000);
+    }, routeIndex === 0 ? 10000 : 20000);
     play();
   }
   const onMetadata = () => {
@@ -58,10 +60,10 @@ export function createVideoController(video, texture, onStatus, onReady) {
   };
   const onError = () => {
     if (disposed) return;
-    if (!fallback) load(true);
+    if (routeIndex + 1 < routes.length) load(routeIndex + 1);
     else { clearTimer(); failed = true; onReady(false); status("error"); }
   };
-  const onPlaying = () => { if (canPlay()) status("playing"); };
+  const onPlaying = () => { if (canPlay()) status(playingStatus()); };
   const onPause = () => { if (!disposed && !failed) status("paused"); };
   const onWaiting = () => { if (canPlay()) status("loading"); };
   const listeners = {
@@ -76,19 +78,19 @@ export function createVideoController(video, texture, onStatus, onReady) {
       if ("active" in next) active = next.active;
       if ("visible" in next) visible = next.visible;
       if (!active || !visible || paused) video.pause();
-      else if (!attached) load(false);
+      else if (!attached) load(0);
       else play();
     },
     toggle() {
       if (disposed) return;
       paused = !video.paused;
       if (paused) video.pause();
-      else { if (!attached) load(false); else play(); }
+      else { if (!attached) load(0); else play(); }
     },
     retry() {
       if (disposed) return;
       paused = false;
-      load(false);
+      load(0);
     },
     dispose() {
       if (disposed) return;

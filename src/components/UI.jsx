@@ -1,9 +1,8 @@
 import { useEffect } from "react";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { videoControllerAtom, videoStatusAtom } from "./HostedVideo";
-import { HOSTED_VIDEO_URL } from "./video-controller";
 
-import { BOOK_SHEETS, isBookOpen, projects } from "./page-content";
+import { BOOK_SHEETS, getSpreadVideo, isBookOpen, projects } from "./page-content";
 
 export const pageAtom = atom(0);
 export const pages = Array.from({ length: BOOK_SHEETS }, (_, number) => ({
@@ -14,6 +13,7 @@ export const pages = Array.from({ length: BOOK_SHEETS }, (_, number) => ({
 export const UI = () => {
   const [page, setPage] = useAtom(pageAtom);
   const status = useAtomValue(videoStatusAtom);
+  const clip = getSpreadVideo(page);
   const controller = useAtomValue(videoControllerAtom);
 
   useEffect(() => {
@@ -37,12 +37,12 @@ export const UI = () => {
     <main className="book-ui pointer-events-none select-none fixed inset-0 z-10 flex justify-end flex-col">
       {isBookOpen(page, pages.length) && (
         <div className="video-controls pointer-events-auto" aria-label="Book video controls">
-          <span role="status">{status === "loading" ? "Loading video…" : status === "error" ? "Video unavailable" : "Star book video"}</span>
+          <span role="status">{status === "loading" ? "Loading video…" : status === "error" ? "Video unavailable" : status === "placeholder" ? "Star preview" : clip.label}</span>
           <button type="button" disabled={!controller || status === "loading" || status === "error"} onClick={() => controller?.toggle()}>
-            {status === "playing" ? "Pause" : "Play"}
+            {(status === "playing" || status === "placeholder") ? "Pause" : "Play"}
           </button>
-          {(status === "error" || status === "paused") && <button type="button" onClick={() => controller?.retry()}>Retry</button>}
-          <a href={HOSTED_VIDEO_URL} target="_blank" rel="noopener noreferrer">Open clip ↗</a>
+          {(status === "error" || status === "paused" || status === "placeholder") && <button type="button" onClick={() => controller?.retry()}>Retry</button>}
+          <a href={clip.url} target="_blank" rel="noopener noreferrer">Open clip ↗</a>
         </div>
       )}
       {page === pages.length - 1 && (

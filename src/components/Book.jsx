@@ -22,7 +22,7 @@ import { degToRad } from "three/src/math/MathUtils.js";
 import { pageAtom, pages } from "./UI";
 import { useHostedVideoTexture } from "./HostedVideo";
 import { useIndexPageTexture } from "./IndexPage";
-import { getPageContent, isBookOpen } from "./page-content";
+import { getPageContent, getSpreadVideo, isBookOpen } from "./page-content";
 
 const easingFactor = 0.5; 
 const easingFactorFold = 0.3; 
@@ -282,7 +282,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, videoTexture, ind
 export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
-  const videoTexture = useHostedVideoTexture(isBookOpen(delayedPage, pages.length));
+  const videoTexture = useHostedVideoTexture(isBookOpen(delayedPage, pages.length), getSpreadVideo(delayedPage));
   const indexTexture = useIndexPageTexture();
 
   useEffect(() => {

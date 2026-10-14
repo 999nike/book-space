@@ -20,3 +20,10 @@ store the source video in Git. Remove the fallback after the media origin
 allows cross-origin requests from the production book domain.
 
 Cover artwork was edited with the built-in ImageGen tool; see COVER-ASSETS.md.
+
+The first three spreads now select externally hosted clips: Space Junkz gameplay,
+the Junkz landing page, and Smokey Space. These MP4 files belong in
+E:\WIZZ-Server\media\book-space and are not committed to this repository.
+A single decoder is replaced when the selected clip changes. If a project clip
+is unavailable, the existing star preview remains available and the controls
+offer Retry. The book geometry, materials and turning animation are unchanged.

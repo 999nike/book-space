@@ -2,17 +2,20 @@ import { useEffect, useState } from "react";
 import { atom, useSetAtom } from "jotai";
 import { SRGBColorSpace, VideoTexture } from "three";
 import { createVideoController } from "./video-controller";
+import { STAR_VIDEO } from "./page-content";
 
 export const videoStatusAtom = atom("idle");
 export const videoControllerAtom = atom(null);
 
-export function useHostedVideoTexture(active) {
-  const [texture, setTexture] = useState(null);
+export function useHostedVideoTexture(active, clip = STAR_VIDEO) {
+  const [readyTexture, setReadyTexture] = useState(null);
+  const { url, fallback, backup } = clip;
   const [controller, setController] = useState(null);
   const setStatus = useSetAtom(videoStatusAtom);
   const setSharedController = useSetAtom(videoControllerAtom);
 
   useEffect(() => {
+    setReadyTexture(null);
     const video = document.createElement("video");
     video.crossOrigin = "anonymous";
     video.muted = true;
@@ -24,14 +27,14 @@ export function useHostedVideoTexture(active) {
     document.body.appendChild(video);
     const map = new VideoTexture(video);
     map.colorSpace = SRGBColorSpace;
-    const player = createVideoController(video, map, setStatus, (ready) => setTexture(ready ? map : null));
+    const player = createVideoController(video, map, setStatus, (ready) => setReadyTexture(ready ? { url, map } : null), { url, fallback, backup });
     setController(player);
     setSharedController(player);
     return () => {
       setSharedController(null);
       player.dispose();
     };
-  }, [setSharedController, setStatus]);
+  }, [setSharedController, setStatus, url, fallback, backup]);
 
   useEffect(() => {
     if (!controller) return;
@@ -41,5 +44,5 @@ export function useHostedVideoTexture(active) {
     return () => document.removeEventListener("visibilitychange", sync);
   }, [controller, active]);
 
-  return texture;
+  return readyTexture?.url === url ? readyTexture.map : null;
 }
