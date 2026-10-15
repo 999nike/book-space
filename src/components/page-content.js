@@ -13,7 +13,7 @@ export const projects = [
 // Each sheet has a front and a back; reserve only the final inside face for the index.
 export function getPageContent(number, total) {
   return {
-    front: number === 0 ? "cover" : number === total - 1 ? "index" : "preview",
+    front: number === 0 ? "cover" : number === total - 1 ? "index" : number === total - 2 ? "stars" : "preview",
     back: number === total - 1 ? "cover" : "video",
   };
 }
@@ -22,7 +22,7 @@ export function isBookOpen(page, total) {
 }
 
 const MEDIA_ORIGIN = "https://media.w-i-z-z-lab-studios.com";
-export const STAR_VIDEO = { id: "stars", label: "Star book video", url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK };
+export const STAR_VIDEO = { id: "stars", label: "Star book video", fit: "cover", url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK };
 const hostedClip = (id, label, filename = id + ".mp4") => ({
   id,
   label,

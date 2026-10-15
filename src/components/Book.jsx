@@ -22,7 +22,7 @@ import { degToRad } from "three/src/math/MathUtils.js";
 import { pageAtom, pages, playbackPageAtom } from "./UI";
 import { useHostedVideoTexture } from "./HostedVideo";
 import { useIndexPageTexture } from "./IndexPage";
-import { getPageContent, getSpreadProject, getSpreadVideo, isBookOpen } from "./page-content";
+import { getPageContent, getSpreadProject, getSpreadVideo, isBookOpen, STAR_VIDEO } from "./page-content";
 import { applyVideoPageUVs } from "./video-layout";
 import { usePreviewPageTexture } from "./PreviewPage";
 
@@ -98,7 +98,7 @@ pages.forEach((page) => {
   useTexture.preload(`/textures/book-cover-roughness.jpg`);
 });
 
-const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requestedPage, turnVersion, onSettled, indexTexture, ...props }) => {
+const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requestedPage, turnVersion, onSettled, indexTexture, starTexture, ...props }) => {
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -109,7 +109,8 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
   picture.colorSpace = picture2.colorSpace = SRGBColorSpace;
   const previewTexture = usePreviewPageTexture(getSpreadProject(number));
   const spread = number + 1;
-  const videoTexture = useHostedVideoTexture(playingPage === spread && isBookOpen(playingPage, pages.length), getSpreadVideo(spread), requestedPage === spread && isBookOpen(requestedPage, pages.length));
+  const clip = getSpreadVideo(spread);
+  const videoTexture = useHostedVideoTexture(clip !== STAR_VIDEO && playingPage === spread && isBookOpen(playingPage, pages.length), clip, clip !== STAR_VIDEO && requestedPage === spread && isBookOpen(requestedPage, pages.length));
   const settledState = useRef({ version: -1, reported: false });
   const group = useRef();
   const turnedAt = useRef(0);
@@ -177,16 +178,16 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
   useEffect(() => {
     const content = getPageContent(number, pages.length);
     applyVideoPageUVs(manualSkinnedMesh.geometry, pageGeometry.attributes.uv);
-    const frontMap = content.front === "video"
+    const frontMap = content.front === "stars" ? starTexture || picture : content.front === "video"
       ? videoTexture || picture
       : content.front === "preview" ? previewTexture || indexTexture || picture
       : content.front === "index" ? indexTexture || picture : picture;
-    const backMap = content.back === "video" ? videoTexture || picture2 : picture2;
+    const backMap = content.back === "video" ? (clip === STAR_VIDEO ? starTexture : videoTexture) || picture2 : picture2;
     for (const [index, map] of [[4, frontMap], [5, backMap]]) {
       const material = manualSkinnedMesh.material[index];
       if (material.map !== map) { material.map = map; material.needsUpdate = true; }
     }
-  }, [manualSkinnedMesh, number, page, picture, picture2, videoTexture, indexTexture, previewTexture]);
+  }, [manualSkinnedMesh, number, page, picture, picture2, videoTexture, indexTexture, previewTexture, starTexture, clip]);
 
   // useHelper(skinnedMeshRef, SkeletonHelper, "red");
 
@@ -306,6 +307,11 @@ export const Book = ({ ...props }) => {
   const [delayedPage, setDelayedPage] = useState(page);
   const [playingPage, setPlayingPage] = useAtom(playbackPageAtom);
   const indexTexture = useIndexPageTexture();
+  const starTexture = useHostedVideoTexture(
+    isBookOpen(playingPage, pages.length) && getSpreadVideo(playingPage) === STAR_VIDEO,
+    STAR_VIDEO,
+    isBookOpen(page, pages.length) && getSpreadVideo(page) === STAR_VIDEO
+  );
   const settledSheets = useRef(new Map());
   const turnTarget = useRef({ requested: null, rendered: null, version: 0 });
   if (turnTarget.current.requested !== page || turnTarget.current.rendered !== delayedPage) {
@@ -356,6 +362,7 @@ export const Book = ({ ...props }) => {
         <Page
           key={index}
           indexTexture={indexTexture}
+          starTexture={starTexture}
           playingPage={playingPage}
           requestedPage={page}
           turnVersion={turnTarget.current.version}
