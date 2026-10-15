@@ -11,6 +11,8 @@ export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cr
   texture.minFilter = LinearFilter;
   texture.generateMipmaps = false;
   let disposed = false, frameHandle = null, lastTime = -1;
+  let lastUploadedTime = -Infinity;
+  const MIN_FRAME_INTERVAL = 1 / 30;
   const draw = () => {
     if (disposed || !ctx || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return;
     const sourceY = video.videoHeight * Math.min(0.25, Math.max(0, cropTop));
@@ -23,9 +25,15 @@ export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cr
     lastTime = video.currentTime;
   };
   const useVideoFrames = typeof video.requestVideoFrameCallback === "function";
-  const tick = () => {
+  const tick = (_now, metadata) => {
     if (disposed) return;
-    if (useVideoFrames || lastTime !== video.currentTime) draw();
+    const mediaTime = metadata?.mediaTime ?? video.currentTime;
+    if (!video.paused && video.readyState >= 2 &&
+        mediaTime !== lastTime &&
+        (mediaTime < lastUploadedTime || mediaTime - lastUploadedTime >= MIN_FRAME_INTERVAL - 0.002)) {
+      draw();
+      lastUploadedTime = mediaTime;
+    }
     frameHandle = useVideoFrames ? video.requestVideoFrameCallback(tick) : requestAnimationFrame(tick);
   };
   video.addEventListener("loadeddata", draw);
