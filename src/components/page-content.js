@@ -32,7 +32,7 @@ const hostedClip = (id, label, filename = id + ".mp4") => ({
 const bookClip = (id, label, filename) => ({
   ...hostedClip(id, label),
   url: MEDIA_ORIGIN + "/book-space/" + encodeURIComponent(filename),
-  fit: "page",
+  fit: "fill",
   cropBottom: 0.10,
 });
 const junkzClips = [1, 3, 4, 5].map(number => ({
@@ -45,8 +45,8 @@ const spreadVideos = {
   2: bookClip("book-landing", "Junkz landing", "landing.mp4"),
   3: { ...bookClip("cmd-centre", "Smokey Space", "cmd-centre.mp4"), fit: "fill" },
   4: bookClip("book-universal", "Universal Space", "universal.mp4"),
-  5: { ...hostedClip("wizzonline", "WIZZ Online"), fit: "page", cropTop: 0.12, cropBottom: 0.065 },
-  6: { ...hostedClip("wizz-glass-labs", "WIZZ Glass Lab"), fit: "page", cropTop: 0.12, cropBottom: 0.06 },
+  5: { ...hostedClip("wizzonline", "WIZZ Online"), fit: "fill", cropTop: 0.12, cropBottom: 0.065 },
+  6: { ...hostedClip("wizz-glass-labs", "WIZZ Glass Lab"), fit: "fill", cropTop: 0.12, cropBottom: 0.06 },
 };
 export function getSpreadVideo(page) {
   return spreadVideos[page] || STAR_VIDEO;
