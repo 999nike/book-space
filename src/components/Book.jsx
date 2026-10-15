@@ -75,7 +75,7 @@ pageGeometry.setAttribute(
 );
 
 const whiteColor = new Color("white");
-const emissiveColor = new Color("orange");
+const emissiveColor = new Color("#e7e2f2");
 
 const pageMaterials = [
   new MeshStandardMaterial({
@@ -199,7 +199,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
       settledState.current = { version: turnVersion, reported: false };
     }
     let settled = true;
-    const emissiveIntensity = highlighted ? 0.22 : 0;
+    const emissiveIntensity = highlighted ? 0.025 : 0;
     skinnedMeshRef.current.material[4].emissiveIntensity =
       skinnedMeshRef.current.material[5].emissiveIntensity = MathUtils.lerp(
         skinnedMeshRef.current.material[4].emissiveIntensity,
