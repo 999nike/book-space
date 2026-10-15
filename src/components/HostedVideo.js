@@ -17,7 +17,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
   const clipIndex = position.id === clip.id ? position.index : 0;
   const currentClip = clip.clips?.[clipIndex] || clip;
   const clipCount = clip.clips?.length || 1;
-  const { url, fallback, backup, fit = "contain", cropBottom = 0 } = currentClip;
+  const { url, fallback, backup, fit = "contain", cropTop = 0, cropBottom = 0 } = currentClip;
   const [controller, setController] = useState(null);
   const setStatus = useSetAtom(videoStatusAtom);
   const setSharedController = useSetAtom(videoControllerAtom);
@@ -38,7 +38,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
     };
     video.addEventListener("ended", onEnded);
     document.body.appendChild(video);
-    const pageVideo = createPageVideoTexture(video, { fit, cropBottom });
+    const pageVideo = createPageVideoTexture(video, { fit, cropTop, cropBottom });
     const map = pageVideo.texture;
     const publishStatus = value => {
       lastStatus.current = value;
@@ -53,7 +53,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
       pageVideo.dispose();
       player.dispose();
     };
-  }, [setSharedController, setPlayingClip, setStatus, clip.id, clipIndex, clipCount, url, fallback, backup, fit, cropBottom]);
+  }, [setSharedController, setPlayingClip, setStatus, clip.id, clipIndex, clipCount, url, fallback, backup, fit, cropTop, cropBottom]);
 
   useEffect(() => {
     if (!controller) return;

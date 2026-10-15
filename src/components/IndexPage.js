@@ -32,8 +32,9 @@ export function useIndexPageTexture() {
     ctx.fillStyle = "#d2c6ed";
     ctx.font = "27px Arial, sans-serif";
     ctx.fillText("Games, worlds & other ideas.", 95, 350);
+    const rowGap = Math.min(208, 580 / Math.max(1, projects.length - 1));
     projects.forEach((project, i) => {
-      const y = 530 + i * 208;
+      const y = 500 + i * rowGap;
       ctx.fillStyle = "#ba9fff";
       ctx.font = "28px Arial, sans-serif";
       ctx.fillText(String(i + 1).padStart(2, "0"), 95, y);

@@ -6,6 +6,8 @@ export const projects = [
   { title: "Space Junkz", detail: "PLAY THE GAME", href: "https://space-junkz-shooter.vercel.app/game.html" },
   { title: "Junkz", detail: "THE LANDING PAGE", href: "https://junkz-shooter-landing.vercel.app/" },
   { title: "Smokey Space", detail: "EXPLORE THE WORLD", href: "https://smokey-space.vercel.app/" },
+  { title: "WIZZ Online", detail: "EXPLORE WIZZ", href: "https://cloud-w-i-z-z.vercel.app/" },
+  { title: "WIZZ Glass Lab", detail: "ENTER THE LAB", href: "https://wizz-glass-lab.vercel.app/table.html" },
 ];
 
 // Each sheet has a front and a back; reserve only the final inside face for the index.
@@ -42,6 +44,8 @@ const spreadVideos = {
   2: bookClip("book-landing", "Junkz landing", "landing.mp4"),
   3: hostedClip("smokey-space", "Smokey Space"),
   4: bookClip("book-universal", "Universal Space", "universal.mp4"),
+  5: { ...hostedClip("wizzonline", "WIZZ Online"), fit: "page", cropTop: 0.12, cropBottom: 0.065 },
+  6: { ...hostedClip("wizz-glass-labs", "WIZZ Glass Lab"), fit: "page", cropTop: 0.12, cropBottom: 0.06 },
 };
 export function getSpreadVideo(page) {
   return spreadVideos[page] || STAR_VIDEO;
@@ -52,6 +56,8 @@ const spreadProjects = {
   2: { ...projects[1], branding: "artwork", preview: "/project-art/junkz-landing.png" },
   3: { ...projects[2], branding: "artwork", preview: "/project-art/smokeys-space.png" },
   4: { title: "Universal Space", branding: "artwork", preview: "/project-art/universal-space.png", href: null },
+  5: { ...projects[3], branding: "artwork", preview: "/project-art/wizz-online.jpg" },
+  6: { ...projects[4], branding: "artwork", preview: "/project-art/wizz-glass-lab.jpg" },
 };
 export function getSpreadProject(page) {
   return spreadProjects[page] || null;

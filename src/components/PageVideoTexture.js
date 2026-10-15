@@ -1,7 +1,7 @@
 import { CanvasTexture, LinearFilter, SRGBColorSpace } from "three";
 import { fitPageFrame } from "./video-layout";
 
-export function createPageVideoTexture(video, { fit = "contain", cropBottom = 0 } = {}) {
+export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cropBottom = 0 } = {}) {
   const canvas = document.createElement("canvas");
   canvas.width = 768;
   canvas.height = 1026;
@@ -13,11 +13,12 @@ export function createPageVideoTexture(video, { fit = "contain", cropBottom = 0 
   let disposed = false, frameHandle = null, lastTime = -1;
   const draw = () => {
     if (disposed || !ctx || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return;
-    const sourceHeight = video.videoHeight * (1 - Math.min(0.25, Math.max(0, cropBottom)));
+    const sourceY = video.videoHeight * Math.min(0.25, Math.max(0, cropTop));
+    const sourceHeight = video.videoHeight * (1 - Math.min(0.25, Math.max(0, cropBottom))) - sourceY;
     const frame = fitPageFrame(video.videoWidth, sourceHeight, canvas.width, canvas.height, "left", fit);
     ctx.fillStyle = "#090b18";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(video, 0, 0, video.videoWidth, sourceHeight, frame.x, frame.y, frame.width, frame.height);
+    ctx.drawImage(video, 0, sourceY, video.videoWidth, sourceHeight, frame.x, frame.y, frame.width, frame.height);
     texture.needsUpdate = true;
     lastTime = video.currentTime;
   };

@@ -80,6 +80,22 @@
     {
       "source": "/project-art/smokeys-space.png",
       "destination": "https://media.w-i-z-z-lab-studios.com/Newaps/file_00000000d9448243844a924913442343.png"
+    },
+    {
+      "source": "/test-media/wizzonline.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/wizzonline.mp4"
+    },
+    {
+      "source": "/test-media/wizz-glass-labs.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/wizz-glass-labs.mp4"
+    },
+    {
+      "source": "/project-art/wizz-online.jpg",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/wizz%20%281%29.jpg"
+    },
+    {
+      "source": "/project-art/wizz-glass-lab.jpg",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/wizz-glass-lab.jpg"
     }
   ]
 }
