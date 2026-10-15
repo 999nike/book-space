@@ -25,30 +25,43 @@ export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cr
     lastTime = video.currentTime;
   };
   const useVideoFrames = typeof video.requestVideoFrameCallback === "function";
+  const cancelTick = () => {
+    if (frameHandle === null) return;
+    if (useVideoFrames) video.cancelVideoFrameCallback(frameHandle);
+    else cancelAnimationFrame(frameHandle);
+    frameHandle = null;
+  };
+  const scheduleTick = () => {
+    if (disposed || video.paused || frameHandle !== null) return;
+    frameHandle = useVideoFrames ? video.requestVideoFrameCallback(tick) : requestAnimationFrame(tick);
+  };
   const tick = (_now, metadata) => {
-    if (disposed) return;
+    frameHandle = null;
+    if (disposed || video.paused) return;
     const mediaTime = metadata?.mediaTime ?? video.currentTime;
-    if (!video.paused && video.readyState >= 2 &&
-        mediaTime !== lastTime &&
+    if (video.readyState >= 2 && mediaTime !== lastTime &&
         (mediaTime < lastUploadedTime || mediaTime - lastUploadedTime >= MIN_FRAME_INTERVAL - 0.002)) {
       draw();
       lastUploadedTime = mediaTime;
     }
-    frameHandle = useVideoFrames ? video.requestVideoFrameCallback(tick) : requestAnimationFrame(tick);
+    scheduleTick();
   };
+  const onPlay = () => scheduleTick();
+  const onPause = () => cancelTick();
   video.addEventListener("loadeddata", draw);
   video.addEventListener("seeked", draw);
-  tick();
+  video.addEventListener("playing", onPlay);
+  video.addEventListener("pause", onPause);
+  scheduleTick();
   return {
     texture,
     dispose() {
       disposed = true;
       video.removeEventListener("loadeddata", draw);
       video.removeEventListener("seeked", draw);
-      if (frameHandle !== null) {
-        if (useVideoFrames) video.cancelVideoFrameCallback(frameHandle);
-        else cancelAnimationFrame(frameHandle);
-      }
+      video.removeEventListener("playing", onPlay);
+      video.removeEventListener("pause", onPause);
+      cancelTick();
       // The video controller owns the texture and disposes it with the video.
     },
   };
