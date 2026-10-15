@@ -56,8 +56,8 @@ const spreadProjects = {
   2: { ...projects[1], branding: "artwork", preview: "/project-art/junkz-landing.png" },
   3: { ...projects[2], branding: "artwork", preview: "/project-art/smokeys-space.png" },
   4: { title: "Universal Space", branding: "artwork", preview: "/project-art/universal-space.png", href: null },
-  5: { ...projects[3], branding: "artwork", preview: "/project-art/wizz-online.jpg" },
-  6: { ...projects[4], branding: "artwork", preview: "/project-art/wizz-glass-lab.jpg" },
+  5: { ...projects[3], branding: "artwork", preview: "/project-art/wizz-double.png", artworkHalf: "right" },
+  6: { ...projects[4], branding: "artwork", preview: "/project-art/wizz-double.png", artworkHalf: "left" },
 };
 export function getSpreadProject(page) {
   return spreadProjects[page] || null;

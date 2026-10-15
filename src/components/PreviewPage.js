@@ -4,7 +4,7 @@ import { drawWizzBrand } from "./WizzBrand";
 
 export function usePreviewPageTexture(project) {
   const [ready, setReady] = useState(null);
-  const { preview, title, href, info, branding, edition } = project || {};
+  const { preview, title, href, info, branding, edition, artworkHalf } = project || {};
   useEffect(() => {
     if (!preview && !branding) return;
     let cancelled = false, texture = null;
@@ -17,9 +17,16 @@ export function usePreviewPageTexture(project) {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       if (branding === "artwork") {
-        const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
-        const width = image.naturalWidth * scale, height = image.naturalHeight * scale;
-        ctx.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+        const sourceWidth = artworkHalf ? image.naturalWidth / 2 : image.naturalWidth;
+        const sourceX = artworkHalf === "right" ? sourceWidth : 0;
+        // Split the supplied double artwork without clipping either logo.
+        const scale = artworkHalf
+          ? Math.min(canvas.width / sourceWidth, canvas.height / image.naturalHeight)
+          : Math.max(canvas.width / sourceWidth, canvas.height / image.naturalHeight);
+        const width = sourceWidth * scale, height = image.naturalHeight * scale;
+        ctx.fillStyle = "#03040b";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, sourceX, 0, sourceWidth, image.naturalHeight, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
       } else if (branding === "wizz") {
         drawWizzBrand(ctx, image, edition);
       } else {
@@ -52,7 +59,7 @@ export function usePreviewPageTexture(project) {
       }
       texture = new CanvasTexture(canvas);
       texture.colorSpace = SRGBColorSpace;
-      setReady({ preview, href, title, info, branding, edition, texture });
+      setReady({ preview, href, title, info, branding, edition, artworkHalf, texture });
     };
     image.onload = paint;
     image.src = preview;
@@ -61,6 +68,6 @@ export function usePreviewPageTexture(project) {
       image.onload = null;
       texture?.dispose();
     };
-  }, [preview, title, href, info, branding, edition]);
-  return ready && ready.preview === preview && ready.href === href && ready.title === title && ready.info === info && ready.branding === branding && ready.edition === edition ? ready.texture : null;
+  }, [preview, title, href, info, branding, edition, artworkHalf]);
+  return ready && ready.preview === preview && ready.href === href && ready.title === title && ready.info === info && ready.branding === branding && ready.edition === edition && ready.artworkHalf === artworkHalf ? ready.texture : null;
 }

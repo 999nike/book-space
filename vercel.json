@@ -96,6 +96,10 @@
     {
       "source": "/project-art/wizz-glass-lab.jpg",
       "destination": "https://media.w-i-z-z-lab-studios.com/book-space/wizz-glass-lab.jpg"
+    },
+    {
+      "source": "/project-art/wizz-double.png",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/wizzonlinepluswizzglasslab.png"
     }
   ]
 }
