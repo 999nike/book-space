@@ -28,7 +28,6 @@ const hostedClip = (id, label, filename = id + ".mp4") => ({
   label,
   url: MEDIA_ORIGIN + "/" + encodeURIComponent(filename),
   fallback: "/test-media/" + id + ".mp4",
-  backup: TEST_VIDEO_FALLBACK,
 });
 const bookClip = (id, label, filename) => ({
   ...hostedClip(id, label),
