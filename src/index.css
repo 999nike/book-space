@@ -52,3 +52,8 @@ body {
 .fullscreen-entry button:focus-visible { outline: 2px solid white; outline-offset: 4px; }
 
 .book-startup-loader > div::before { content: ""; position: absolute; left: 50%; top: 42%; width: min(80vw, 640px); aspect-ratio: 715 / 189; transform: translate(-50%, -50%); background: url(/images/wizzlab-logo.png) center / contain no-repeat; clip-path: inset(10mm 0 0 0); pointer-events: none; }
+
+.fullscreen-entry .book-entry-browser { display:block; padding:13px 16px; margin-bottom:9px; border-radius:9px; background:#c5b5ff; color:#171027; text-decoration:none; font:600 13px Poppins,sans-serif; }
+.fullscreen-entry .book-entry-copy { margin-bottom:9px; background:#29203b; color:#fff; }
+.fullscreen-entry .book-entry-help { margin-bottom:15px; font-size:12px; }
+.fullscreen-entry .book-entry-notice { margin:12px 0 0; font-size:12px; overflow-wrap:anywhere; }
