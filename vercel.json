@@ -100,6 +100,10 @@
     {
       "source": "/project-art/wizz-double.png",
       "destination": "https://media.w-i-z-z-lab-studios.com/book-space/wizzonlinepluswizzglasslab.png"
+    },
+    {
+      "source": "/test-media/cmd-centre.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/cmd-centre.mp4"
     }
   ]
 }
