@@ -35,9 +35,11 @@ const bookClip = (id, label, filename) => ({
   fit: "page",
   cropBottom: 0.10,
 });
-const junkzClips = [1, 3, 4, 5].map(number =>
-  bookClip("junkz-" + number, "Space Junkz · Clip " + number, number + ".mp4")
-);
+const junkzClips = [1, 3, 4, 5].map(number => ({
+  ...bookClip("junkz-" + number, "Space Junkz · Clip " + number, number + ".mp4"),
+  // Keep the final 3D recording whole; earlier clips are short previews.
+  ...(number === 5 ? {} : { maxDuration: 15 }),
+}));
 const spreadVideos = {
   1: { ...junkzClips[0], id: "junkz-showreel", label: "Space Junkz showreel", clips: junkzClips },
   2: bookClip("book-landing", "Junkz landing", "landing.mp4"),

@@ -17,7 +17,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
   const clipIndex = position.id === clip.id ? position.index : 0;
   const currentClip = clip.clips?.[clipIndex] || clip;
   const clipCount = clip.clips?.length || 1;
-  const { url, fallback, backup, fit = "contain", cropTop = 0, cropBottom = 0 } = currentClip;
+  const { url, fallback, backup, fit = "contain", cropTop = 0, cropBottom = 0, maxDuration } = currentClip;
   const [controller, setController] = useState(null);
   const setStatus = useSetAtom(videoStatusAtom);
   const setSharedController = useSetAtom(videoControllerAtom);
@@ -33,10 +33,18 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
     video.preload = "auto";
     video.hidden = true;
     video.setAttribute("aria-hidden", "true");
+    let advanced = false;
     const onEnded = () => {
-      if (activeRef.current && clipCount > 1) setPosition({ id: clip.id, index: (clipIndex + 1) % clipCount });
+      if (!activeRef.current || advanced || clipCount <= 1) return;
+      advanced = true;
+      video.pause();
+      setPosition({ id: clip.id, index: (clipIndex + 1) % clipCount });
+    };
+    const onTimeUpdate = () => {
+      if (maxDuration > 0 && !video.paused && video.currentTime >= maxDuration) onEnded();
     };
     video.addEventListener("ended", onEnded);
+    video.addEventListener("timeupdate", onTimeUpdate);
     document.body.appendChild(video);
     const pageVideo = createPageVideoTexture(video, { fit, cropTop, cropBottom });
     const map = pageVideo.texture;
@@ -48,12 +56,13 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
     setController(player);
     return () => {
       video.removeEventListener("ended", onEnded);
+      video.removeEventListener("timeupdate", onTimeUpdate);
       setSharedController(value => value === player ? null : value);
       setPlayingClip(value => value?.controller === player ? null : value);
       pageVideo.dispose();
       player.dispose();
     };
-  }, [setSharedController, setPlayingClip, setStatus, clip.id, clipIndex, clipCount, url, fallback, backup, fit, cropTop, cropBottom]);
+  }, [setSharedController, setPlayingClip, setStatus, clip.id, clipIndex, clipCount, url, fallback, backup, fit, cropTop, cropBottom, maxDuration]);
 
   useEffect(() => {
     if (!controller) return;
