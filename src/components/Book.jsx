@@ -306,6 +306,13 @@ export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
   const [playingPage, setPlayingPage] = useAtom(playbackPageAtom);
+  const centeringRef = useRef();
+  const centerX = delayedPage === 0 ? -PAGE_WIDTH / 2 : delayedPage === pages.length ? PAGE_WIDTH / 2 : 0;
+  const initialCenterX = useRef(centerX);
+
+  useFrame((_, delta) => {
+    if (centeringRef.current) easing.damp(centeringRef.current.position, "x", centerX, 0.45, delta);
+  });
   const indexTexture = useIndexPageTexture();
   const starTexture = useHostedVideoTexture(
     isBookOpen(playingPage, pages.length) && getSpreadVideo(playingPage) === STAR_VIDEO,
@@ -357,23 +364,25 @@ export const Book = ({ ...props }) => {
   }, [page]);
 
   return (
-    <group {...props} rotation-y={-Math.PI / 2}>
-      {[...pages].map((pageData, index) => (
-        <Page
-          key={index}
-          indexTexture={indexTexture}
-          starTexture={starTexture}
-          playingPage={playingPage}
-          requestedPage={page}
-          turnVersion={turnTarget.current.version}
-          onSettled={onSettled}
-          page={delayedPage}
-          number={index}
-          opened={delayedPage > index}
-          bookClosed={delayedPage === 0 || delayedPage === pages.length}
-          {...pageData}
-        />
-      ))}
+    <group ref={centeringRef} position-x={initialCenterX.current}>
+      <group {...props} rotation-y={-Math.PI / 2}>
+        {[...pages].map((pageData, index) => (
+          <Page
+            key={index}
+            indexTexture={indexTexture}
+            starTexture={starTexture}
+            playingPage={playingPage}
+            requestedPage={page}
+            turnVersion={turnTarget.current.version}
+            onSettled={onSettled}
+            page={delayedPage}
+            number={index}
+            opened={delayedPage > index}
+            bookClosed={delayedPage === 0 || delayedPage === pages.length}
+            {...pageData}
+          />
+        ))}
+      </group>
     </group>
   );
 };
