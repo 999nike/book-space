@@ -10,6 +10,7 @@ import {
   Color,
   Float32BufferAttribute,
   MathUtils,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   Skeleton,
   SkinnedMesh,
@@ -77,20 +78,9 @@ pageGeometry.setAttribute(
 const whiteColor = new Color("white");
 const emissiveColor = new Color("#e7e2f2");
 
-const pageMaterials = [
-  new MeshStandardMaterial({
-    color: whiteColor,
-  }),
-  new MeshStandardMaterial({
-    color: "#111",
-  }),
-  new MeshStandardMaterial({
-    color: whiteColor,
-  }),
-  new MeshStandardMaterial({
-    color: whiteColor,
-  }),
-];
+// A thin unlit edge avoids bright, subpixel highlights shimmering between stacked pages.
+const pageEdgeMaterial = new MeshBasicMaterial({ color: "#08080c", toneMapped: false });
+const pageMaterials = [pageEdgeMaterial, pageEdgeMaterial, pageEdgeMaterial, pageEdgeMaterial];
 
 pages.forEach((page) => {
   useTexture.preload(`/textures/${page.front}.jpg`);
