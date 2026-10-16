@@ -3,14 +3,11 @@ import { FullscreenEntry, FullscreenToggle } from "./Fullscreen";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { playingClipAtom, videoControllerAtom, videoStatusAtom } from "./HostedVideo";
 
-import { BOOK_SHEETS, getSpreadProject, getSpreadVideo, isBookOpen, projects } from "./page-content";
+import { BOOK_SHEETS, getSpreadProject, getSpreadVideo, isBookOpen, projects, getPageTextures } from "./page-content";
 
 export const pageAtom = atom(0);
 export const playbackPageAtom = atom(0);
-export const pages = Array.from({ length: BOOK_SHEETS }, (_, number) => ({
-  front: number === 0 ? "book-cover" : "video-test-poster",
-  back: number === BOOK_SHEETS - 1 ? "book-back" : "video-test-poster",
-}));
+export const pages = Array.from({ length: BOOK_SHEETS }, (_, number) => getPageTextures(number, BOOK_SHEETS));
 
 export const UI = () => {
   const [page, setPage] = useAtom(pageAtom);
@@ -20,7 +17,7 @@ export const UI = () => {
   const project = getSpreadProject(playbackPage);
   const controller = useAtomValue(videoControllerAtom);
   const playingClip = useAtomValue(playingClipAtom);
-  const currentClip = playingClip?.spreadId === clip.id ? playingClip : clip;
+  const currentClip = clip && playingClip?.spreadId === clip.id ? playingClip : clip;
 
   useEffect(() => {
     if (page === 0) return;

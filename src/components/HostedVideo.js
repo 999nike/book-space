@@ -2,22 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { atom, useSetAtom } from "jotai";
 import { createPageVideoTexture } from "./PageVideoTexture";
 import { createVideoController, getPlaybackSources } from "./video-controller";
-import { STAR_VIDEO } from "./page-content";
 
 export const videoStatusAtom = atom("idle");
 export const videoControllerAtom = atom(null);
 export const playingClipAtom = atom(null);
 
-export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false) {
+export function useHostedVideoTexture(active, clip, preload = false) {
   const [readyTexture, setReadyTexture] = useState(null);
   const [position, setPosition] = useState({ id: null, index: 0 });
   const activeRef = useRef(active);
   const lastStatus = useRef("idle");
   activeRef.current = active;
-  const clipIndex = position.id === clip.id ? position.index : 0;
-  const currentClip = clip.clips?.[clipIndex] || clip;
-  const clipCount = clip.clips?.length || 1;
-  const { url, fallback, backup, fit = "contain", cropTop = 0, cropBottom = 0, maxDuration } = currentClip;
+  const clipIndex = position.id === clip?.id ? position.index : 0;
+  const currentClip = clip?.clips?.[clipIndex] || clip;
+  const clipCount = clip?.clips?.length || 1;
+  const { url, fallback, fit = "contain", cropTop = 0, cropBottom = 0, maxDuration } = currentClip || {};
   const [controller, setController] = useState(null);
   const setStatus = useSetAtom(videoStatusAtom);
   const setSharedController = useSetAtom(videoControllerAtom);
@@ -25,6 +24,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
 
   useEffect(() => {
     setReadyTexture(null);
+    if (!url) { setController(null); return; }
     const video = document.createElement("video");
     video.crossOrigin = "anonymous";
     video.muted = true;
@@ -52,7 +52,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
       lastStatus.current = value;
       if (activeRef.current) setStatus(value);
     };
-    const player = createVideoController(video, map, publishStatus, ready => setReadyTexture(ready ? { url, map } : null), getPlaybackSources({ url, fallback, backup }));
+    const player = createVideoController(video, map, publishStatus, ready => setReadyTexture(ready ? { url, map } : null), getPlaybackSources({ url, fallback }));
     setController(player);
     return () => {
       video.removeEventListener("ended", onEnded);
@@ -62,7 +62,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
       pageVideo.dispose();
       player.dispose();
     };
-  }, [setSharedController, setPlayingClip, setStatus, clip.id, clipIndex, clipCount, url, fallback, backup, fit, cropTop, cropBottom, maxDuration]);
+  }, [setSharedController, setPlayingClip, setStatus, clip?.id, clipIndex, clipCount, url, fallback, fit, cropTop, cropBottom, maxDuration]);
 
   useEffect(() => {
     if (!controller) return;
@@ -73,7 +73,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
   }, [controller, active, preload]);
 
   useEffect(() => {
-    if (!active || !controller) return;
+    if (!active || !controller || !clip) return;
     setSharedController(controller);
     setPlayingClip({ controller, spreadId: clip.id, url, label: currentClip.label });
     setStatus(lastStatus.current);
@@ -81,7 +81,7 @@ export function useHostedVideoTexture(active, clip = STAR_VIDEO, preload = false
       setSharedController(value => value === controller ? null : value);
       setPlayingClip(value => value?.controller === controller ? null : value);
     };
-  }, [active, controller, clip.id, url, currentClip.label, setSharedController, setPlayingClip, setStatus]);
+  }, [active, controller, clip?.id, url, currentClip?.label, setSharedController, setPlayingClip, setStatus]);
 
-  return readyTexture?.url === url ? readyTexture.map : null;
+  return readyTexture && readyTexture.url === url ? readyTexture.map : null;
 }

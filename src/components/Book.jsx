@@ -22,7 +22,7 @@ import { degToRad } from "three/src/math/MathUtils.js";
 import { pageAtom, pages, playbackPageAtom } from "./UI";
 import { useHostedVideoTexture } from "./HostedVideo";
 import { useIndexPageTexture } from "./IndexPage";
-import { getPageContent, getSpreadProject, getSpreadVideo, isBookOpen, STAR_VIDEO } from "./page-content";
+import { getPageContent, getSpreadProject, getSpreadVideo, isBookOpen, STAR_VIDEO, isStarSpread, getPageTexture } from "./page-content";
 import { applyVideoPageUVs } from "./video-layout";
 import { usePreviewPageTexture } from "./PreviewPage";
 
@@ -109,8 +109,9 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
   picture.colorSpace = picture2.colorSpace = SRGBColorSpace;
   const previewTexture = usePreviewPageTexture(getSpreadProject(number));
   const spread = number + 1;
-  const clip = getSpreadVideo(spread);
-  const videoTexture = useHostedVideoTexture(clip !== STAR_VIDEO && playingPage === spread && isBookOpen(playingPage, pages.length), clip, clip !== STAR_VIDEO && requestedPage === spread && isBookOpen(requestedPage, pages.length));
+  const content = getPageContent(number, pages.length);
+  const clip = content.back === "video" ? getSpreadVideo(spread) : null;
+  const videoTexture = useHostedVideoTexture(Boolean(clip) && playingPage === spread && isBookOpen(playingPage, pages.length), clip, Boolean(clip) && requestedPage === spread && isBookOpen(requestedPage, pages.length));
   const settledState = useRef({ version: -1, reported: false });
   const group = useRef();
   const turnedAt = useRef(0);
@@ -178,11 +179,8 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
   useEffect(() => {
     const content = getPageContent(number, pages.length);
     applyVideoPageUVs(manualSkinnedMesh.geometry, pageGeometry.attributes.uv);
-    const frontMap = content.front === "stars" ? starTexture || picture : content.front === "video"
-      ? videoTexture || picture
-      : content.front === "preview" ? previewTexture || indexTexture || picture
-      : content.front === "index" ? indexTexture || picture : picture;
-    const backMap = content.back === "video" ? (clip === STAR_VIDEO ? starTexture : videoTexture) || picture2 : picture2;
+    const frontMap = getPageTexture(content.front, { picture, videoTexture, previewTexture, indexTexture, starTexture });
+    const backMap = getPageTexture(content.back, { picture: picture2, videoTexture, starTexture });
     for (const [index, map] of [[4, frontMap], [5, backMap]]) {
       const material = manualSkinnedMesh.material[index];
       if (material.map !== map) { material.map = map; material.needsUpdate = true; }
@@ -315,9 +313,9 @@ export const Book = ({ ...props }) => {
   });
   const indexTexture = useIndexPageTexture();
   const starTexture = useHostedVideoTexture(
-    isBookOpen(playingPage, pages.length) && getSpreadVideo(playingPage) === STAR_VIDEO,
+    isStarSpread(playingPage),
     STAR_VIDEO,
-    isBookOpen(page, pages.length) && getSpreadVideo(page) === STAR_VIDEO
+    isStarSpread(page)
   );
   const settledSheets = useRef(new Map());
   const turnTarget = useRef({ requested: null, rendered: null, version: 0 });

@@ -14,8 +14,28 @@ export const projects = [
 export function getPageContent(number, total) {
   return {
     front: number === 0 ? "cover" : number === total - 1 ? "index" : number === total - 2 ? "stars" : "preview",
-    back: number === total - 1 ? "cover" : "video",
+    back: number === total - 1 ? "cover" : isStarSpread(number + 1, total) ? "stars" : "video",
   };
+}
+// Stars belong only to the two deliberately empty spreads, never to a project fallback.
+export function isStarSpread(page, total = BOOK_SHEETS) {
+  return page === total - 2 || page === total - 1;
+}
+export function getPageTextures(number, total) {
+  const content = getPageContent(number, total);
+  return {
+    front: number === 0 ? "book-cover" : content.front === "stars" ? "video-test-poster" : "book-back",
+    back: content.back === "stars" ? "video-test-poster" : "book-back",
+  };
+}
+export function getPageTexture(kind, { picture, videoTexture, previewTexture, indexTexture, starTexture }) {
+  switch (kind) {
+    case "video": return videoTexture || picture;
+    case "preview": return previewTexture || picture;
+    case "index": return indexTexture || picture;
+    case "stars": return starTexture || picture;
+    default: return picture;
+  }
 }
 export function isBookOpen(page, total) {
   return page > 0 && page < total;
@@ -49,7 +69,7 @@ const spreadVideos = {
   6: { ...hostedClip("wizz-glass-labs", "WIZZ Glass Lab"), fit: "fill", cropTop: 0.12, cropBottom: 0.06 },
 };
 export function getSpreadVideo(page) {
-  return spreadVideos[page] || STAR_VIDEO;
+  return spreadVideos[page] || (isStarSpread(page) ? STAR_VIDEO : null);
 }
 
 const spreadProjects = {
