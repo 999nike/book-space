@@ -99,11 +99,15 @@
     },
     {
       "source": "/project-art/wizz-double.png",
-      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/wizzonlinepluswizzglasslab.png"
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/file_00000000ce6c81f4a52611a64a4ccd4e.png"
     },
     {
       "source": "/test-media/cmd-centre.mp4",
-      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/cmd-centre.mp4"
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/Screen_Recording_20261015_115915_Chrome.mp4"
+    },
+    {
+      "source": "/test-media/smokey-command-centre.mp4",
+      "destination": "https://media.w-i-z-z-lab-studios.com/book-space/Screen_Recording_20261015_115915_Chrome.mp4"
     }
   ]
 }

@@ -1,80 +1,123 @@
 import assert from "node:assert/strict";
 import { createVideoController, getPlaybackSources, HOSTED_VIDEO_URL, TEST_VIDEO_FALLBACK } from "./src/components/video-controller.js";
-import { BOOK_SHEETS, getPageContent, getSpreadVideo, getSpreadProject, isBookOpen } from "./src/components/page-content.js";
-const surfaces=Array.from({length:BOOK_SHEETS},(_,number)=>getPageContent(number,BOOK_SHEETS));
-const kinds=surfaces.flatMap(surface=>[surface.front,surface.back]);
-assert.equal(kinds.filter(kind=>kind==="cover").length,2,"both branded covers remain static");
-assert.equal(kinds.filter(kind=>kind==="index").length,1,"exactly one index face");
-assert.equal(kinds.filter(kind=>kind==="video").length,8,"every left inside face plays video");
-assert.equal(kinds.filter(kind=>kind==="preview").length,7,"right inside faces show site previews");
-assert.equal(surfaces.at(-1).front,"index","index is the final inside face");
-assert.equal(surfaces.at(-2).back,"video","video faces the final index");
-assert.match(getSpreadVideo(1).url,/\/startscreenlvl1\.mp4$/);
-assert.match(getSpreadVideo(2).url,/\/junkz-landing\.mp4$/);
-assert.match(getSpreadVideo(3).url,/\/smokey-space\.mp4$/);
-assert.match(getSpreadVideo(4).url,/\/universal-space\.mp4$/);
-assert.deepEqual(getSpreadVideo(1).clips.map(clip=>clip.id),["startscreenlvl1","m1boss","m7","scorpianboss","map-hangar"]);
-assert.match(getSpreadVideo(1).clips.at(-1).url,/\/map%20hangar\.mp4$/);
-assert.equal(getSpreadVideo(5).id,"stars");
-for(const page of [1,2,3]) assert.ok(getSpreadProject(page).href.startsWith("https://"),"known projects have clickable destinations");
-assert.equal(getSpreadProject(4).href,null,"Universal Space is information only");
-for(const name of ["Universal Space","Office","Code Space"]) assert.ok(getSpreadProject(4).info.includes(name),"information page names all three apps");
+import { BOOK_SHEETS, getPageContent, getPageTextures, getPageTexture, getSpreadVideo, isStarSpread, STAR_VIDEO } from "./src/components/page-content.js";
+
+const neutral = {}, stars = {}, frame = {}, artwork = {}, index = {};
+for (let number = 0; number < BOOK_SHEETS; number++) {
+  const faces = getPageContent(number, BOOK_SHEETS), textures = getPageTextures(number, BOOK_SHEETS);
+  for (const side of ["front", "back"]) {
+    const spread = number + (side === "back" ? 1 : 0);
+    if (textures[side] === "video-test-poster") {
+      assert.equal(faces[side], "stars");
+      assert.ok(isStarSpread(spread), "star poster belongs only to an empty spread");
+    }
+    if (faces[side] !== "stars") assert.notEqual(getPageTexture(faces[side], { picture: neutral, starTexture: stars }), stars);
+  }
+}
+for (const page of [0, BOOK_SHEETS, -1, 99]) {
+  assert.equal(isStarSpread(page), false);
+  assert.equal(getSpreadVideo(page), null, "covers and unknown pages must not default to stars");
+}
+for (const page of [7, 8]) assert.equal(getSpreadVideo(page), STAR_VIDEO);
+assert.equal(getPageTexture("video", { picture: neutral, starTexture: stars }), neutral);
+assert.equal(getPageTexture("video", { picture: neutral, videoTexture: frame, starTexture: stars }), frame);
+assert.equal(getPageTexture("preview", { picture: neutral, indexTexture: index, starTexture: stars }), neutral);
+assert.equal(getPageTexture("preview", { picture: neutral, previewTexture: artwork, starTexture: stars }), artwork);
+assert.equal(getPageTexture("stars", { picture: neutral, starTexture: stars }), stars);
+assert.equal(getPageContent(8, 9).front, "index");
+assert.deepEqual(getSpreadVideo(1).clips.map(c => c.maxDuration ?? null), [15, 15, 15, null]);
+
 class FakeVideo {
-  constructor() { this.paused=true;this.readyState=0;this.videoWidth=1920;this.videoHeight=1080;this.events=new Map();this.loads=0;this.plays=0; }
-  addEventListener(n,f){this.events.set(n,f);}
-  removeEventListener(n,f){if(this.events.get(n)===f)this.events.delete(n);}
-  fire(n){this.events.get(n)?.();}
-  play(){this.paused=false;this.plays++;this.fire("playing");return Promise.resolve();}
-  pause(){if(!this.paused){this.paused=true;this.fire("pause");}}
-  load(){this.loads++;}
-  removeAttribute(n){delete this[n];}
-  remove(){this.removed=true;}
+  paused = true; readyState = 0; events = new Map(); history = [];
+  addEventListener(name, callback) { this.events.set(name, callback); }
+  removeEventListener(name, callback) { if (this.events.get(name) === callback) this.events.delete(name); }
+  fire(name) { this.events.get(name)?.(); }
+  set src(value) { this.source = value; this.history.push(value); }
+  get src() { return this.source; }
+  play() { this.paused = false; this.fire("playing"); return Promise.resolve(); }
+  pause() { if (!this.paused) { this.paused = true; this.fire("pause"); } }
+  load() { this.readyState = 0; }
+  removeAttribute(name) { if (name === "src") this.source = undefined; }
+  remove() { this.removed = true; }
 }
-const video=new FakeVideo();
-const vector=()=>({x:1,y:1,set(x,y){this.x=x;this.y=y;}});
-const texture={repeat:vector(),offset:vector(),dispose(){this.disposed=true;}};
-const states=[],ready=[];
-const controller=createVideoController(video,texture,s=>states.push(s),r=>ready.push(r));
-assert.equal(video.src,undefined,"cover does not fetch a video");
-controller.update({active:true,visible:true});
-assert.equal(video.src,TEST_VIDEO_FALLBACK);
-await Promise.resolve();
-assert.equal(video.paused,false);
-video.readyState=4;video.fire("loadedmetadata");video.fire("loadeddata");
-assert.equal(ready.at(-1),true);
-assert.deepEqual([texture.repeat.x,texture.repeat.y,texture.offset.x,texture.offset.y],[1,1,0,0],"full landscape frame remains visible");
-video.videoWidth=1024;video.videoHeight=1368;video.fire("loadedmetadata");
-assert.deepEqual([texture.repeat.x,texture.repeat.y,texture.offset.x,texture.offset.y],[1,1,0,0],"full portrait frame remains visible, including top and bottom");
-assert.equal(video.loads,1,"full-frame mapping never reloads the stream");
-controller.update({active:false});assert.equal(video.paused,true,"turned pages pause");
-controller.update({active:true});assert.equal(video.paused,false,"visible page resumes");
-controller.toggle();assert.equal(video.paused,true);
-controller.update({visible:false});controller.update({visible:true});assert.equal(video.paused,true,"user pause survives visibility changes");
-controller.toggle();assert.equal(video.paused,false);
-controller.update({visible:false});assert.equal(video.paused,true,"hidden tab pauses");
-controller.update({visible:true});assert.equal(video.paused,false);
-for(let spread=1;spread<BOOK_SHEETS;spread++){controller.update({active:isBookOpen(spread,BOOK_SHEETS)});assert.equal(video.paused,false,"video stays playing across spreads");}
-assert.equal(video.loads,1,"page turns reuse one stream");
-controller.update({active:isBookOpen(BOOK_SHEETS,BOOK_SHEETS)});assert.equal(video.paused,true,"back cover pauses playback");
-controller.update({active:isBookOpen(0,BOOK_SHEETS)});assert.equal(video.paused,true,"front cover pauses playback");
-controller.update({active:isBookOpen(1,BOOK_SHEETS)});assert.equal(video.loads,1,"reopening resumes without reloading");
-video.readyState=0;video.fire("error");assert.equal(video.src,HOSTED_VIDEO_URL,"failed same-origin playback can try the direct media origin");
-video.fire("error");assert.equal(states.at(-1),"error");
-controller.retry();assert.equal(video.src,TEST_VIDEO_FALLBACK);
-controller.dispose();assert.equal(texture.disposed,true);assert.equal(video.removed,true);assert.equal(video.events.size,0);
-assert.equal(video.src,undefined);
-for(const clip of [...getSpreadVideo(1).clips,...[2,3,4].map(getSpreadVideo)]){
-  const sources=getPlaybackSources(clip), element=new FakeVideo();
-  assert.equal(sources.url,clip.fallback,"known working same-origin route loads first");
-  const map={repeat:vector(),offset:vector(),dispose(){}};
-  const clipStates=[];
-  const player=createVideoController(element,map,value=>clipStates.push(value),()=>{},sources);
-  assert.equal(element.src,undefined);
-  player.update({active:true});assert.equal(element.src,sources.url);
-  element.fire("error");assert.equal(element.src,sources.fallback);
-  element.fire("error");assert.equal(element.src,clip.backup,"missing project clips retain the star preview");
-  element.fire("playing");assert.equal(clipStates.at(-1),"placeholder");
-  player.retry();assert.equal(element.src,sources.url,"Retry checks the installed project file again");
+function harness(sources) {
+  const video = new FakeVideo(), states = [], ready = [];
+  const vector = () => ({ set() {} });
+  const texture = { repeat: vector(), offset: vector(), dispose() { this.disposed = true; } };
+  const player = createVideoController(video, texture, value => states.push(value), value => ready.push(value), sources);
+  return { video, states, ready, texture, player };
+}
+const originalSetTimeout = globalThis.setTimeout, originalClearTimeout = globalThis.clearTimeout;
+const timers = new Map(); let timerId = 0;
+globalThis.setTimeout = (callback, delay) => { const id = ++timerId; timers.set(id, { callback, delay }); return id; };
+globalThis.clearTimeout = id => timers.delete(id);
+const expire = delay => {
+  const entry = [...timers].find(([, timer]) => timer.delay === delay);
+  assert.ok(entry, "expected timer " + delay);
+  timers.delete(entry[0]); entry[1].callback();
+};
+try {
+  const clips = [...getSpreadVideo(1).clips, ...[2, 3, 4, 5, 6].map(getSpreadVideo)];
+  for (const clip of clips) {
+    const sources = getPlaybackSources({ ...clip, backup: TEST_VIDEO_FALLBACK });
+    assert.equal(sources.backup, undefined, "background backup is rejected");
+    const { video, player, states, texture } = harness(sources);
+    assert.equal(video.src, undefined, "inactive clips do not load");
+    player.update({ active: true });
+    assert.equal(video.src, clip.fallback);
+    video.fire("error");
+    assert.equal(video.src, clip.url, "fallback still loads the same project");
+    video.fire("error");
+    assert.equal(states.at(-1), "error");
+    expire(2000);
+    assert.equal(video.src, clip.fallback, "temporary failure retries the project");
+    video.fire("error"); video.fire("error");
+    expire(4000);
+    video.fire("error"); video.fire("error");
+    assert.equal(timers.size, 0, "retries are bounded");
+    assert.ok(video.history.every(url => url === clip.url || url === clip.fallback));
+    assert.ok(!video.history.includes(HOSTED_VIDEO_URL) && !video.history.includes(TEST_VIDEO_FALLBACK));
+    player.update({ active: false }); player.update({ active: true });
+    assert.equal(video.src, clip.fallback, "returning to a failed page retries it");
+    player.dispose();
+    assert.equal(video.events.size, 0);
+    assert.equal(texture.disposed, true);
+    assert.equal(timers.size, 0);
+  }
+  const { video, player, ready } = harness(getPlaybackSources(getSpreadVideo(3)));
+  player.update({ active: false, preload: true });
+  assert.equal(video.paused, true, "preloading does not start playback");
+  video.readyState = 4; video.fire("canplay");
+  assert.equal(ready.at(-1), true, "canplay also makes the texture ready");
+  player.update({ active: true });
+  video.fire("waiting"); expire(15000);
+  assert.equal(ready.at(-1), true, "recovery retains the last project frame");
+  video.fire("error");
+  player.update({ visible: false });
+  assert.equal(timers.size, 0, "hidden pages stop pending retries");
+  player.update({ visible: true });
+  assert.equal(video.src, getSpreadVideo(3).fallback);
+  video.readyState = 4; video.fire("loadeddata");
+  player.toggle();
+  player.update({ visible: false }); player.update({ visible: true });
+  assert.equal(video.paused, true, "user pause survives visibility changes");
+  player.retry();
+  assert.equal(video.src, getSpreadVideo(3).fallback);
   player.dispose();
+  assert.equal(timers.size, 0);
+
+  const empty = harness();
+  empty.player.update({ active: true });
+  assert.equal(empty.video.src, undefined, "no implicit background source");
+  assert.equal(empty.states.at(-1), "error");
+  empty.player.dispose();
+  const background = harness(getPlaybackSources(STAR_VIDEO));
+  background.player.update({ active: true });
+  assert.equal(background.video.src, TEST_VIDEO_FALLBACK, "explicit empty-page stars still work");
+  background.player.dispose();
+  assert.equal(timers.size, 0);
+  console.log("PASS: all 18 faces isolate stars to empty pages; 9 project clips recover safely through failures, revisits, buffering, visibility, pause and cleanup.");
+} finally {
+  globalThis.setTimeout = originalSetTimeout;
+  globalThis.clearTimeout = originalClearTimeout;
 }
-console.log("PASS: four project spreads and five-clip Junkz playlist sources, server fallbacks and Retry; 8 video faces and 7 previews, final index, unchanged covers, one shared stream, playback, page/tab pause, fallback, retry, cleanup.");

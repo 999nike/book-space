@@ -63,7 +63,7 @@ const junkzClips = [1, 3, 4, 5].map(number => ({
 const spreadVideos = {
   1: { ...junkzClips[0], id: "junkz-showreel", label: "Space Junkz showreel", clips: junkzClips },
   2: bookClip("book-landing", "Junkz landing", "landing.mp4"),
-  3: { ...bookClip("cmd-centre", "Smokey Space", "cmd-centre.mp4"), fit: "fill" },
+  3: { ...bookClip("smokey-command-centre", "Smokey Space", "Screen_Recording_20261015_115915_Chrome.mp4"), fit: "fill" },
   4: bookClip("book-universal", "Universal Space", "universal.mp4"),
   5: { ...hostedClip("wizzonline", "WIZZ Online"), fit: "fill", cropTop: 0.12, cropBottom: 0.065 },
   6: { ...hostedClip("wizz-glass-labs", "WIZZ Glass Lab"), fit: "fill", cropTop: 0.12, cropBottom: 0.06 },
