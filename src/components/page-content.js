@@ -67,13 +67,14 @@ const bookClip = (id, label, filename) => ({
   fit: "fill",
   cropBottom: 0.10,
 });
-const junkzClips = [1, 3, 4, 5].map(number => ({
-  ...bookClip("junkz-" + number, "Space Junkz · Clip " + number, number + ".mp4"),
-  // Keep the final 3D recording whole; earlier clips are short previews.
-  ...(number === 5 ? {} : { maxDuration: 15 }),
-}));
+// The approved edit contains all scenes, title transitions and the phone-controls crop.
+const junkzShowreel = {
+  ...hostedClip("junkz-showreel-final-web", "Space Junkz showreel"),
+  fit: "fill",
+  cropBottom: 0,
+};
 const spreadVideos = {
-  1: { ...junkzClips[0], id: "junkz-showreel", label: "Space Junkz showreel", clips: junkzClips },
+  1: junkzShowreel,
   2: bookClip("book-landing", "Junkz landing", "landing.mp4"),
   3: { ...bookClip("smokey-command-centre", "Smokey Space", "Screen_Recording_20261015_115915_Chrome.mp4"), fit: "fill" },
   4: bookClip("book-universal", "Universal Space", "universal.mp4"),

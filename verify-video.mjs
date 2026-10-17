@@ -25,7 +25,13 @@ assert.equal(getPageTexture("preview", { picture: neutral, indexTexture: index, 
 assert.equal(getPageTexture("preview", { picture: neutral, previewTexture: artwork, starTexture: stars }), artwork);
 assert.equal(getPageTexture("stars", { picture: neutral, starTexture: stars }), stars);
 assert.equal(getPageContent(8, 9).front, "index");
-assert.deepEqual(getSpreadVideo(1).clips.map(c => c.maxDuration ?? null), [15, 15, 15, null]);
+const showreel = getSpreadVideo(1);
+assert.equal(showreel.clips, undefined, "the finished edit plays as one uninterrupted looping video");
+assert.equal(showreel.maxDuration, undefined, "the finished showreel is never cut off at the old 15-second limit");
+assert.equal(showreel.cropBottom, 0, "the phone-controls crop is already baked into the finished edit");
+assert.equal(showreel.fit, "fill");
+assert.equal(showreel.url, "https://media.w-i-z-z-lab-studios.com/junkz-showreel-final-web.mp4");
+assert.equal(showreel.fallback, "/test-media/junkz-showreel-final-web.mp4");
 
 class FakeVideo {
   paused = true; readyState = 0; events = new Map(); history = [];
@@ -57,7 +63,7 @@ const expire = delay => {
   timers.delete(entry[0]); entry[1].callback();
 };
 try {
-  const clips = [...getSpreadVideo(1).clips, ...[2, 3, 4, 5, 6].map(getSpreadVideo)];
+  const clips = [1, 2, 3, 4, 5, 6].map(getSpreadVideo);
   for (const clip of clips) {
     const sources = getPlaybackSources({ ...clip, backup: TEST_VIDEO_FALLBACK });
     assert.equal(sources.backup, undefined, "background backup is rejected");
@@ -117,7 +123,7 @@ try {
   assert.equal(background.video.src, TEST_VIDEO_FALLBACK, "explicit empty-page stars still work");
   background.player.dispose();
   assert.equal(timers.size, 0);
-  console.log("PASS: all 18 faces isolate stars to empty pages; 9 project clips recover safely through failures, revisits, buffering, visibility, pause and cleanup.");
+  console.log("PASS: all 18 faces isolate stars to empty pages; 6 project videos recover safely through failures, revisits, buffering, visibility, pause and cleanup.");
 } finally {
   globalThis.setTimeout = originalSetTimeout;
   globalThis.clearTimeout = originalClearTimeout;
