@@ -7,11 +7,13 @@ export const videoStatusAtom = atom("idle");
 export const videoControllerAtom = atom(null);
 export const playingClipAtom = atom(null);
 
-export function useHostedVideoTexture(active, clip, preload = false) {
+export function useHostedVideoTexture(active, clip, preload = false, focused = active) {
   const [readyTexture, setReadyTexture] = useState(null);
   const [position, setPosition] = useState({ id: null, index: 0 });
   const activeRef = useRef(active);
   const lastStatus = useRef("idle");
+  const focusedRef = useRef(focused);
+  focusedRef.current = focused;
   activeRef.current = active;
   const clipIndex = position.id === clip?.id ? position.index : 0;
   const currentClip = clip?.clips?.[clipIndex] || clip;
@@ -28,10 +30,15 @@ export function useHostedVideoTexture(active, clip, preload = false) {
     const video = document.createElement("video");
     video.crossOrigin = "anonymous";
     video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
     video.loop = clipCount === 1;
     video.playsInline = true;
     video.preload = "auto";
-    video.hidden = true;
+    // Keep inline media attached without display:none, which can suppress mobile preparation.
+    video.style.cssText = "position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1";
     video.setAttribute("aria-hidden", "true");
     let advanced = false;
     const onEnded = () => {
@@ -46,13 +53,15 @@ export function useHostedVideoTexture(active, clip, preload = false) {
     video.addEventListener("ended", onEnded);
     video.addEventListener("timeupdate", onTimeUpdate);
     document.body.appendChild(video);
-    const pageVideo = createPageVideoTexture(video, { fit, cropTop, cropBottom });
+    const pageVideo = createPageVideoTexture(video, { fit, cropTop, cropBottom,
+      onReady: map => setReadyTexture({ url, map }),
+    });
     const map = pageVideo.texture;
     const publishStatus = value => {
       lastStatus.current = value;
-      if (activeRef.current) setStatus(value);
+      if (focusedRef.current) setStatus(value);
     };
-    const player = createVideoController(video, map, publishStatus, ready => setReadyTexture(ready ? { url, map } : null), getPlaybackSources({ url, fallback }));
+    const player = createVideoController(video, map, publishStatus, ready => { if (!ready) setReadyTexture(null); }, getPlaybackSources({ url, fallback }));
     setController(player);
     return () => {
       video.removeEventListener("ended", onEnded);
@@ -73,7 +82,7 @@ export function useHostedVideoTexture(active, clip, preload = false) {
   }, [controller, active, preload]);
 
   useEffect(() => {
-    if (!active || !controller || !clip) return;
+    if (!focused || !controller || !clip) return;
     setSharedController(controller);
     setPlayingClip({ controller, spreadId: clip.id, url, label: currentClip.label });
     setStatus(lastStatus.current);
@@ -81,7 +90,7 @@ export function useHostedVideoTexture(active, clip, preload = false) {
       setSharedController(value => value === controller ? null : value);
       setPlayingClip(value => value?.controller === controller ? null : value);
     };
-  }, [active, controller, clip?.id, url, currentClip?.label, setSharedController, setPlayingClip, setStatus]);
+  }, [focused, controller, clip?.id, url, currentClip?.label, setSharedController, setPlayingClip, setStatus]);
 
   return readyTexture && readyTexture.url === url ? readyTexture.map : null;
 }

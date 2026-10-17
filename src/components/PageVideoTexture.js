@@ -1,7 +1,7 @@
 import { CanvasTexture, LinearFilter, SRGBColorSpace } from "three";
 import { fitPageFrame } from "./video-layout";
 
-export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cropBottom = 0 } = {}) {
+export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cropBottom = 0, onReady } = {}) {
   const canvas = document.createElement("canvas");
   canvas.width = 768;
   canvas.height = 1026;
@@ -11,7 +11,7 @@ export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cr
   texture.minFilter = LinearFilter;
   texture.generateMipmaps = false;
   let disposed = false, frameHandle = null, lastTime = -1;
-  let lastUploadedTime = -Infinity;
+  let lastUploadedTime = -Infinity, painted = false;
   const MIN_FRAME_INTERVAL = 1 / 30;
   const draw = () => {
     if (disposed || !ctx || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return;
@@ -20,9 +20,12 @@ export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cr
     const frame = fitPageFrame(video.videoWidth, sourceHeight, canvas.width, canvas.height, "left", fit);
     ctx.fillStyle = "#090b18";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(video, 0, sourceY, video.videoWidth, sourceHeight, frame.x, frame.y, frame.width, frame.height);
+    try {
+      ctx.drawImage(video, 0, sourceY, video.videoWidth, sourceHeight, frame.x, frame.y, frame.width, frame.height);
+    } catch { return; }
     texture.needsUpdate = true;
     lastTime = video.currentTime;
+    if (!painted) { painted = true; onReady?.(texture); }
   };
   const useVideoFrames = typeof video.requestVideoFrameCallback === "function";
   const cancelTick = () => {
@@ -46,9 +49,10 @@ export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cr
     }
     scheduleTick();
   };
-  const onPlay = () => scheduleTick();
+  const onPlay = () => { draw(); scheduleTick(); };
   const onPause = () => cancelTick();
   video.addEventListener("loadeddata", draw);
+  video.addEventListener("canplay", draw);
   video.addEventListener("seeked", draw);
   video.addEventListener("playing", onPlay);
   video.addEventListener("pause", onPause);
@@ -58,6 +62,7 @@ export function createPageVideoTexture(video, { fit = "contain", cropTop = 0, cr
     dispose() {
       disposed = true;
       video.removeEventListener("loadeddata", draw);
+      video.removeEventListener("canplay", draw);
       video.removeEventListener("seeked", draw);
       video.removeEventListener("playing", onPlay);
       video.removeEventListener("pause", onPause);

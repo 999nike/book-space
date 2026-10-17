@@ -34,7 +34,7 @@ class FakeVideo {
   fire(name) { this.events.get(name)?.(); }
   set src(value) { this.source = value; this.history.push(value); }
   get src() { return this.source; }
-  play() { this.paused = false; this.fire("playing"); return Promise.resolve(); }
+  play() { this.paused = false; if (this.readyState >= 2) this.fire("playing"); return Promise.resolve(); }
   pause() { if (!this.paused) { this.paused = true; this.fire("pause"); } }
   load() { this.readyState = 0; }
   removeAttribute(name) { if (name === "src") this.source = undefined; }
@@ -86,9 +86,10 @@ try {
   }
   const { video, player, ready } = harness(getPlaybackSources(getSpreadVideo(3)));
   player.update({ active: false, preload: true });
-  assert.equal(video.paused, true, "preloading does not start playback");
+  assert.equal(video.paused, false, "muted preparation decodes the first frame");
   video.readyState = 4; video.fire("canplay");
   assert.equal(ready.at(-1), true, "canplay also makes the texture ready");
+  assert.equal(video.paused, true, "prepared video pauses immediately after its first frame");
   player.update({ active: true });
   video.fire("waiting"); expire(15000);
   assert.equal(ready.at(-1), true, "recovery retains the last project frame");

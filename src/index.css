@@ -57,3 +57,7 @@ body {
 .fullscreen-entry .book-entry-copy { margin-bottom:9px; background:#29203b; color:#fff; }
 .fullscreen-entry .book-entry-help { margin-bottom:15px; font-size:12px; }
 .fullscreen-entry .book-entry-notice { margin:12px 0 0; font-size:12px; overflow-wrap:anywhere; }
+
+.book-video-notice { position: absolute; left: 50%; bottom: max(78px, calc(env(safe-area-inset-bottom) + 64px)); transform: translateX(-50%); display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 32px); padding: 9px 13px; border: 1px solid #ffffff20; border-radius: 10px; background: #141224cc; backdrop-filter: blur(10px); color: #eee9ff; font: 12px Poppins, sans-serif; }
+.book-video-notice button { flex-shrink: 0; padding: 6px 10px; border: 1px solid #ffffff35; border-radius: 6px; background: #ffffff12; color: white; font: inherit; cursor: pointer; }
+.book-video-notice button:focus-visible { outline: 2px solid #c5b5ff; outline-offset: 3px; }

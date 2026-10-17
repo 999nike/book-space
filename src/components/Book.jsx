@@ -23,7 +23,7 @@ import { degToRad } from "three/src/math/MathUtils.js";
 import { pageAtom, pages, playbackPageAtom } from "./UI";
 import { useHostedVideoTexture } from "./HostedVideo";
 import { useIndexPageTexture } from "./IndexPage";
-import { getPageContent, getSpreadProject, getSpreadVideo, isBookOpen, STAR_VIDEO, isStarSpread, getPageTexture } from "./page-content";
+import { getPageContent, getSpreadProject, getSpreadVideo, STAR_VIDEO, isStarSpread, getPageTexture, getVideoPageState } from "./page-content";
 import { applyVideoPageUVs } from "./video-layout";
 import { usePreviewPageTexture } from "./PreviewPage";
 
@@ -88,7 +88,7 @@ pages.forEach((page) => {
   useTexture.preload(`/textures/book-cover-roughness.jpg`);
 });
 
-const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requestedPage, turnVersion, onSettled, indexTexture, starTexture, ...props }) => {
+const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requestedPage, turnVersion, onSettled, indexTexture, starTexture, loadingPoster, onPreviewReady, ...props }) => {
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -98,10 +98,12 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
   ]);
   picture.colorSpace = picture2.colorSpace = SRGBColorSpace;
   const previewTexture = usePreviewPageTexture(getSpreadProject(number));
+  useEffect(() => { if (previewTexture) onPreviewReady(number, previewTexture); }, [number, previewTexture, onPreviewReady]);
   const spread = number + 1;
   const content = getPageContent(number, pages.length);
   const clip = content.back === "video" ? getSpreadVideo(spread) : null;
-  const videoTexture = useHostedVideoTexture(Boolean(clip) && playingPage === spread && isBookOpen(playingPage, pages.length), clip, Boolean(clip) && requestedPage === spread && isBookOpen(requestedPage, pages.length));
+  const media = getVideoPageState(spread, requestedPage, playingPage, pages.length);
+  const videoTexture = useHostedVideoTexture(Boolean(clip) && media.active, clip, Boolean(clip) && media.preload, Boolean(clip) && media.focused);
   const settledState = useRef({ version: -1, reported: false });
   const group = useRef();
   const turnedAt = useRef(0);
@@ -170,12 +172,12 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
     const content = getPageContent(number, pages.length);
     applyVideoPageUVs(manualSkinnedMesh.geometry, pageGeometry.attributes.uv);
     const frontMap = getPageTexture(content.front, { picture, videoTexture, previewTexture, indexTexture, starTexture });
-    const backMap = getPageTexture(content.back, { picture: picture2, videoTexture, starTexture });
+    const backMap = getPageTexture(content.back, { picture: loadingPoster || picture2, videoTexture, starTexture });
     for (const [index, map] of [[4, frontMap], [5, backMap]]) {
       const material = manualSkinnedMesh.material[index];
       if (material.map !== map) { material.map = map; material.needsUpdate = true; }
     }
-  }, [manualSkinnedMesh, number, page, picture, picture2, videoTexture, indexTexture, previewTexture, starTexture, clip]);
+  }, [manualSkinnedMesh, number, page, picture, picture2, videoTexture, indexTexture, previewTexture, starTexture, clip, loadingPoster]);
 
   // useHelper(skinnedMeshRef, SkeletonHelper, "red");
 
@@ -301,10 +303,16 @@ export const Book = ({ ...props }) => {
   useFrame((_, delta) => {
     if (centeringRef.current) easing.damp(centeringRef.current.position, "x", centerX, 0.45, delta);
   });
+  const [previewTextures, setPreviewTextures] = useState({});
+  const onPreviewReady = useCallback((number, texture) => {
+    setPreviewTextures(current => current[number] === texture ? current : { ...current, [number]: texture });
+  }, []);
   const indexTexture = useIndexPageTexture();
+  const starPages = [pages.length - 2, pages.length - 1].map(spread => getVideoPageState(spread, page, playingPage, pages.length));
   const starTexture = useHostedVideoTexture(
-    isStarSpread(playingPage),
+    starPages.some(media => media.active),
     STAR_VIDEO,
+    starPages.some(media => media.preload),
     isStarSpread(page)
   );
   const settledSheets = useRef(new Map());
@@ -322,6 +330,13 @@ export const Book = ({ ...props }) => {
     }
     setPlayingPage(settledPage);
   }, [setPlayingPage]);
+
+  // Incoming video already plays on its own sheet; never retain an old decoder indefinitely.
+  useEffect(() => {
+    if (page !== delayedPage || playingPage === delayedPage) return;
+    const timeout = setTimeout(() => setPlayingPage(delayedPage), 1800);
+    return () => clearTimeout(timeout);
+  }, [page, delayedPage, playingPage, setPlayingPage]);
 
   useEffect(() => {
     let timeout;
@@ -359,6 +374,8 @@ export const Book = ({ ...props }) => {
             key={index}
             indexTexture={indexTexture}
             starTexture={starTexture}
+            loadingPoster={previewTextures[index + 1]}
+            onPreviewReady={onPreviewReady}
             playingPage={playingPage}
             requestedPage={page}
             turnVersion={turnTarget.current.version}

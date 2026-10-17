@@ -41,6 +41,18 @@ export function isBookOpen(page, total) {
   return page > 0 && page < total;
 }
 
+export function getVideoPageState(spread, requestedPage, playingPage, total = BOOK_SHEETS) {
+  const requested = isBookOpen(requestedPage, total) && spread === requestedPage;
+  const outgoing = isBookOpen(playingPage, total) && spread === playingPage;
+  const next = requestedPage === total ? total - 1 : requestedPage + 1;
+  return {
+    active: requested || outgoing,
+    focused: requested,
+    // Only warm the next page after the outgoing page has finished; at most two streams.
+    preload: !requested && !outgoing && requestedPage === playingPage && isBookOpen(next, total) && spread === next,
+  };
+}
+
 const MEDIA_ORIGIN = "https://media.w-i-z-z-lab-studios.com";
 export const STAR_VIDEO = { id: "stars", label: "Star book video", fit: "cover", url: HOSTED_VIDEO_URL, fallback: TEST_VIDEO_FALLBACK };
 const hostedClip = (id, label, filename = id + ".mp4") => ({
