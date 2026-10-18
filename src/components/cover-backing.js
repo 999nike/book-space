@@ -38,7 +38,10 @@ export function createCoverBacking(pageMesh, number, total) {
   geometry.setAttribute("skinWeight", new Float32BufferAttribute(weights, 4));
   geometry.computeBoundingBox();
   geometry.computeBoundingSphere();
-  const outside = pageMesh.material[front ? 4 : 5];
+  const outside = pageMesh.material[front ? 4 : 5].clone();
+  // Broaden the outer-cover highlight while retaining the supplied holographic roughness map.
+  outside.roughness = Math.max(outside.roughness ?? 0.1, 0.28);
+  outside.envMapIntensity = 0.72;
   const mesh = new SkinnedMesh(geometry, [
     rimMaterial, rimMaterial, rimMaterial, rimMaterial,
     front ? outside : liningMaterial, front ? liningMaterial : outside,

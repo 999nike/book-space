@@ -15,3 +15,6 @@ Research:
 - [Three.js BoxGeometry](https://threejs.org/docs/pages/BoxGeometry.html): subdivided geometry used to keep backing skinning light.
 
 Verification: video, playback and framing regressions; real Three.js transformed-pose checks confirm adding the backing leaves every original page vertex, root bone and inverse bind matrix unchanged. No browser is connected in this session, so visual approval still comes from testing the preview.
+
+
+Binding refinement: a 52-vertex rounded ribbon joins the actual front/back root-bone hinge positions. It samples both hinges in the book's local space, including their original stack offsets; the joint has closed top/bottom caps and does not add turning rules. Geometry updates are skipped when the hinge positions are unchanged. Outer cover material is cloned to soften HDR highlights (roughness at least 0.28, environment intensity 0.72); the actual artwork and holographic roughness map remain shared. Original paper materials and video surfaces are unchanged.

@@ -27,6 +27,7 @@ import { getPageContent, getSpreadProject, getSpreadVideo, STAR_VIDEO, isStarSpr
 import { applyVideoPageUVs } from "./video-layout";
 import { usePreviewPageTexture } from "./PreviewPage";
 import { createCoverBacking } from "./cover-backing";
+import { BookBinding } from "./BookBinding";
 
 const easingFactor = 0.5; 
 const easingFactorFold = 0.3; 
@@ -89,7 +90,7 @@ pages.forEach((page) => {
   useTexture.preload(`/textures/book-cover-roughness.jpg`);
 });
 
-const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requestedPage, turnVersion, onSettled, indexTexture, starTexture, loadingPoster, onPreviewReady, ...props }) => {
+const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requestedPage, turnVersion, onSettled, indexTexture, starTexture, loadingPoster, onPreviewReady, onCoverReady, ...props }) => {
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -168,6 +169,12 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
     createCoverBacking(mesh, number, pages.length);
     return mesh;
   }, []);
+
+  useEffect(() => {
+    if (number !== 0 && number !== pages.length - 1) return;
+    onCoverReady(number, manualSkinnedMesh);
+    return () => onCoverReady(number, null);
+  }, [number, manualSkinnedMesh, onCoverReady]);
 
   // Each face has its own content; the original cover and material effects stay intact.
   useEffect(() => {
@@ -299,6 +306,10 @@ export const Book = ({ steady = false, ...props }) => {
   const [delayedPage, setDelayedPage] = useState(page);
   const [playingPage, setPlayingPage] = useAtom(playbackPageAtom);
   const centeringRef = useRef();
+  const coverMeshes = useRef({ front: null, back: null });
+  const onCoverReady = useCallback((number, mesh) => {
+    coverMeshes.current[number === 0 ? "front" : "back"] = mesh;
+  }, []);
   const centerX = delayedPage === 0 ? -PAGE_WIDTH / 2 : delayedPage === pages.length ? PAGE_WIDTH / 2 : 0;
   const initialCenterX = useRef(centerX);
 
@@ -380,6 +391,7 @@ export const Book = ({ steady = false, ...props }) => {
             starTexture={starTexture}
             loadingPoster={previewTextures[index + 1]}
             onPreviewReady={onPreviewReady}
+            onCoverReady={onCoverReady}
             playingPage={playingPage}
             requestedPage={page}
             turnVersion={turnTarget.current.version}
@@ -391,6 +403,7 @@ export const Book = ({ steady = false, ...props }) => {
             {...pageData}
           />
         ))}
+        <BookBinding covers={coverMeshes} />
       </group>
     </group>
   );
