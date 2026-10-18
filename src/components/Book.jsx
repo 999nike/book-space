@@ -26,6 +26,7 @@ import { useIndexPageTexture } from "./IndexPage";
 import { getPageContent, getSpreadProject, getSpreadVideo, STAR_VIDEO, isStarSpread, getPageTexture, getVideoPageState } from "./page-content";
 import { applyVideoPageUVs } from "./video-layout";
 import { usePreviewPageTexture } from "./PreviewPage";
+import { createCoverBacking } from "./cover-backing";
 
 const easingFactor = 0.5; 
 const easingFactorFold = 0.3; 
@@ -164,6 +165,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
     mesh.frustumCulled = false;
     mesh.add(skeleton.bones[0]);
     mesh.bind(skeleton);
+    createCoverBacking(mesh, number, pages.length);
     return mesh;
   }, []);
 
@@ -292,7 +294,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
   );
 };
 
-export const Book = ({ ...props }) => {
+export const Book = ({ steady = false, ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
   const [playingPage, setPlayingPage] = useAtom(playbackPageAtom);
@@ -301,7 +303,9 @@ export const Book = ({ ...props }) => {
   const initialCenterX = useRef(centerX);
 
   useFrame((_, delta) => {
-    if (centeringRef.current) easing.damp(centeringRef.current.position, "x", centerX, 0.45, delta);
+    if (!centeringRef.current) return;
+    if (steady) centeringRef.current.position.x = centerX;
+    else easing.damp(centeringRef.current.position, "x", centerX, 0.45, delta);
   });
   const [previewTextures, setPreviewTextures] = useState({});
   const onPreviewReady = useCallback((number, texture) => {

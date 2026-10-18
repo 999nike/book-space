@@ -11,7 +11,7 @@ import { getBookFitDistance } from "./book-framing";
 
 import { Book } from "./Book";
 
-const BookCamera = () => {
+const BookCamera = ({ steady = false }) => {
   const page = useAtomValue(pageAtom);
   const playbackPage = useAtomValue(playbackPageAtom);
   const opened = isBookOpen(page, BOOK_SHEETS) || isBookOpen(playbackPage, BOOK_SHEETS);
@@ -26,16 +26,17 @@ const BookCamera = () => {
     offset.copy(camera.position).sub(orbit.target);
     if (offset.lengthSq() < 0.0001) offset.set(-0.5, 1, 4);
     const currentDistance = offset.length();
-    const goal = getBookFitDistance({ width: size.width, height: size.height, fov: camera.getEffectiveFOV(), direction: offset.toArray(), opened });
+    const goal = getBookFitDistance({ width: size.width, height: size.height, fov: camera.getEffectiveFOV(), direction: offset.toArray(), opened: steady || opened });
     motion.current.distance = currentDistance;
     motion.current.goal = goal;
-    if (motion.current.initial) {
+    if (motion.current.initial || steady) {
       camera.position.copy(orbit.target).addScaledVector(offset.normalize(), goal);
       orbit.update();
       motion.current.initial = false;
+      motion.current.active = false;
       motion.current.distance = goal;
     } else motion.current.active = true;
-  }, [camera, size.width, size.height, opened, offset]);
+  }, [camera, size.width, size.height, opened, offset, steady]);
 
   useFrame((_, delta) => {
     const orbit = controls.current, transition = motion.current;
@@ -52,18 +53,20 @@ const BookCamera = () => {
 };
 
 export const Experience = () => {
+  // Trial defaults to a steady inspection view; motion=on restores the normal presentation.
+  const steady = new URLSearchParams(window.location.search).get("motion") !== "on";
   return (
     <>
       <Float
         rotation-x={-Math.PI / 4}
-        floatIntensity={0.5}
+        floatIntensity={steady ? 0 : 0.5}
         floatingRange={[-0.1, 0.1]}
-        speed={1}
-        rotationIntensity={1}
+        speed={steady ? 0 : 1}
+        rotationIntensity={steady ? 0 : 1}
       >
-        <Book />
+        <Book steady={steady} />
       </Float>
-      <BookCamera />
+      <BookCamera steady={steady} />
       <Environment preset="studio"></Environment>
       <directionalLight
         position={[2, 5, 2]}
