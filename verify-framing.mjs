@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { getBookFitDistance } from "./src/components/book-framing.js";
+import { PAGE_WIDTH, PAGE_HEIGHT, COVER_OVERHANG, COVER_HEAD_OVERHANG } from "./src/components/book-dimensions.js";
 
 const viewports = [[390, 844], [430, 932], [844, 390], [1366, 768], [1920, 1080]];
 let corners = 0;
@@ -14,8 +15,8 @@ for (const [width, height] of viewports) for (const direction of [[-0.5, 1, 4], 
   assert.ok(Number.isFinite(closed) && closed > 0);
   assert.ok(opened >= closed * 1.05, "opening always includes a gentle pullback");
   for (const [isOpen, distance] of [[false, closed], [true, opened]]) {
-    for (const x of isOpen ? [-1.28, 1.28] : [-0.64, 0.64]) {
-      for (const y of [-0.855, 0.855]) for (const z of isOpen ? [-0.35, 0.35] : [-0.025, 0.025]) {
+    for (const x of isOpen ? [-PAGE_WIDTH - COVER_OVERHANG, PAGE_WIDTH + COVER_OVERHANG] : [-PAGE_WIDTH / 2 - COVER_OVERHANG, PAGE_WIDTH / 2 + COVER_OVERHANG]) {
+      for (const y of [-PAGE_HEIGHT / 2 - COVER_HEAD_OVERHANG, PAGE_HEIGHT / 2 + COVER_HEAD_OVERHANG]) for (const z of isOpen ? [-0.35, 0.35] : [-0.06, 0.06]) {
         const point = [x, (y + z) / Math.sqrt(2), (z - y) / Math.sqrt(2)];
         const depth = distance - dot(point, view);
         const pixelX = width / 2 + dot(point, right) / depth / Math.tan(Math.PI / 8) * height / 2;
