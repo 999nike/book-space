@@ -33,8 +33,9 @@ const insideCurveStrength = 0.18;
 const outsideCurveStrength = 0.05; 
 const turningCurveStrength = 0.09; 
 
-import { PAGE_WIDTH, PAGE_HEIGHT, PAGE_DEPTH, getCoverOffset } from "./book-dimensions";
-import { createHardcoverGeometry } from "./hardcover-geometry";
+const PAGE_WIDTH = 1.28;
+const PAGE_HEIGHT = 1.71;
+const PAGE_DEPTH = 0.003;
 const PAGE_SEGMENTS = 30;
 const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS;
 
@@ -80,14 +81,6 @@ const emissiveColor = new Color("#e7e2f2");
 // A thin unlit edge avoids bright, subpixel highlights shimmering between stacked pages.
 const pageEdgeMaterial = new MeshBasicMaterial({ color: "#08080c", toneMapped: false });
 const pageMaterials = [pageEdgeMaterial, pageEdgeMaterial, pageEdgeMaterial, pageEdgeMaterial];
-const coverRimMaterial = new MeshStandardMaterial({
-  color: "#6842bb", metalness: 0.65, roughness: 0.28,
-  emissive: "#48218b", emissiveIntensity: 0.22,
-});
-const coverEdgeMaterial = new MeshStandardMaterial({
-  color: "#0a0b20", metalness: 0.25, roughness: 0.42,
-});
-const coverMaterials = [coverRimMaterial, coverEdgeMaterial, coverEdgeMaterial, coverEdgeMaterial];
 
 pages.forEach((page) => {
   useTexture.preload(`/textures/${page.front}.jpg`);
@@ -96,7 +89,6 @@ pages.forEach((page) => {
 });
 
 const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requestedPage, turnVersion, onSettled, indexTexture, starTexture, loadingPoster, onPreviewReady, ...props }) => {
-  const hardback = number === 0 || number === pages.length - 1;
   const [picture, picture2, pictureRoughness] = useTexture([
     `/textures/${front}.jpg`,
     `/textures/${back}.jpg`,
@@ -136,7 +128,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
     const skeleton = new Skeleton(bones);
 
     const materials = [
-      ...(hardback ? coverMaterials : pageMaterials),
+      ...pageMaterials,
       new MeshStandardMaterial({
         color: whiteColor,
         map: picture,
@@ -164,8 +156,8 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
         emissiveIntensity: 0,
       }),
     ];
-    const geometry = hardback ? createHardcoverGeometry(PAGE_SEGMENTS) : pageGeometry.clone();
-    if (!hardback) applyVideoPageUVs(geometry, pageGeometry.attributes.uv);
+    const geometry = pageGeometry.clone();
+    applyVideoPageUVs(geometry, pageGeometry.attributes.uv, getPageContent(number, pages.length));
     const mesh = new SkinnedMesh(geometry, materials);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -178,7 +170,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
   // Each face has its own content; the original cover and material effects stay intact.
   useEffect(() => {
     const content = getPageContent(number, pages.length);
-    if (!hardback) applyVideoPageUVs(manualSkinnedMesh.geometry, pageGeometry.attributes.uv);
+    applyVideoPageUVs(manualSkinnedMesh.geometry, pageGeometry.attributes.uv);
     const frontMap = getPageTexture(content.front, { picture, videoTexture, previewTexture, indexTexture, starTexture });
     const backMap = getPageTexture(content.back, { picture: loadingPoster || picture2, videoTexture, starTexture });
     for (const [index, map] of [[4, frontMap], [5, backMap]]) {
@@ -231,7 +223,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
         outsideCurveStrength * outsideCurveIntensity * targetRotation +
         turningCurveStrength * turningIntensity * targetRotation;
       let foldRotationAngle = degToRad(Math.sign(targetRotation) * 2);
-      if (bookClosed || hardback) {
+      if (bookClosed) {
         if (i === 0) {
           rotationAngle = targetRotation;
           foldRotationAngle = 0;
@@ -293,7 +285,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
       <primitive
         object={manualSkinnedMesh}
         ref={skinnedMeshRef}
-        position-z={-number * PAGE_DEPTH + page * PAGE_DEPTH + getCoverOffset(number, pages.length)}
+        position-z={-number * PAGE_DEPTH + page * PAGE_DEPTH}
       />
 
     </group>
