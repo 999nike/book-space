@@ -10,8 +10,11 @@ import { BOOK_SHEETS, isBookOpen } from "./page-content";
 import { getBookFitDistance } from "./book-framing";
 
 import { Book } from "./Book";
+import { RestingBook } from "./RestingBook";
+import { WoodenDesk } from "./WoodenDesk";
+import { DESK_FLOOR_Y } from "./desk-layout";
 
-const BookCamera = ({ steady = false }) => {
+const BookCamera = ({ steady = false, desk = false }) => {
   const page = useAtomValue(pageAtom);
   const playbackPage = useAtomValue(playbackPageAtom);
   const opened = isBookOpen(page, BOOK_SHEETS) || isBookOpen(playbackPage, BOOK_SHEETS);
@@ -24,6 +27,7 @@ const BookCamera = ({ steady = false }) => {
     const orbit = controls.current;
     if (!orbit || !camera.isPerspectiveCamera) return;
     offset.copy(camera.position).sub(orbit.target);
+    if (desk && motion.current.initial) offset.set(-0.2, 3.2, 2.8);
     if (offset.lengthSq() < 0.0001) offset.set(-0.5, 1, 4);
     const currentDistance = offset.length();
     const goal = getBookFitDistance({ width: size.width, height: size.height, fov: camera.getEffectiveFOV(), direction: offset.toArray(), opened: steady || opened });
@@ -36,7 +40,7 @@ const BookCamera = ({ steady = false }) => {
       motion.current.active = false;
       motion.current.distance = goal;
     } else motion.current.active = true;
-  }, [camera, size.width, size.height, opened, offset, steady]);
+  }, [camera, size.width, size.height, opened, offset, steady, desk]);
 
   useFrame((_, delta) => {
     const orbit = controls.current, transition = motion.current;
@@ -54,10 +58,12 @@ const BookCamera = ({ steady = false }) => {
 
 export const Experience = () => {
   // Trial defaults to a steady inspection view; motion=on restores the normal presentation.
-  const steady = new URLSearchParams(window.location.search).get("motion") !== "on";
+  const parameters = new URLSearchParams(window.location.search);
+  const desk = parameters.get("desk") !== "off";
+  const steady = desk || parameters.get("motion") !== "on";
   return (
     <>
-      <Float
+      {desk ? <><WoodenDesk /><RestingBook /></> : <Float
         rotation-x={-Math.PI / 4}
         floatIntensity={steady ? 0 : 0.5}
         floatingRange={[-0.1, 0.1]}
@@ -65,8 +71,8 @@ export const Experience = () => {
         rotationIntensity={steady ? 0 : 1}
       >
         <Book steady={steady} />
-      </Float>
-      <BookCamera steady={steady} />
+      </Float>}
+      <BookCamera steady={steady} desk={desk} />
       <Environment preset="studio"></Environment>
       <directionalLight
         position={[2, 5, 2]}
@@ -76,7 +82,7 @@ export const Experience = () => {
         shadow-mapSize-height={2048}
         shadow-bias={-0.0001}
       />
-      <mesh position-y={-1.5} rotation-x={-Math.PI / 2} receiveShadow>
+      <mesh position-y={desk ? DESK_FLOOR_Y - 0.01 : -1.5} rotation-x={-Math.PI / 2} receiveShadow>
         <planeGeometry args={[100, 100]} />
         <shadowMaterial transparent opacity={0.2} />
       </mesh>

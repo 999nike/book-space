@@ -112,6 +112,10 @@
     {
       "source": "/test-media/junkz-showreel-final-web.mp4",
       "destination": "https://media.w-i-z-z-lab-studios.com/junkz-showreel-final-web.mp4"
+    },
+    {
+      "source": "/scene-assets/wooden-desk-web.glb",
+      "destination": "https://media.w-i-z-z-lab-studios.com/wooden-desk-web.glb"
     }
   ]
 }

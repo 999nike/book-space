@@ -301,7 +301,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, playingPage, requ
   );
 };
 
-export const Book = ({ steady = false, ...props }) => {
+export const Book = ({ steady = false, onCoverMesh, ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
   const [playingPage, setPlayingPage] = useAtom(playbackPageAtom);
@@ -309,7 +309,8 @@ export const Book = ({ steady = false, ...props }) => {
   const coverMeshes = useRef({ front: null, back: null });
   const onCoverReady = useCallback((number, mesh) => {
     coverMeshes.current[number === 0 ? "front" : "back"] = mesh;
-  }, []);
+    onCoverMesh?.(number, mesh);
+  }, [onCoverMesh]);
   const centerX = delayedPage === 0 ? -PAGE_WIDTH / 2 : delayedPage === pages.length ? PAGE_WIDTH / 2 : 0;
   const initialCenterX = useRef(centerX);
 

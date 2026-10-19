@@ -52,6 +52,7 @@ export const UI = () => {
           <summary>Controls</summary>
           <div className="book-controls-panel">
             <FullscreenToggle />
+            {new URLSearchParams(window.location.search).get("desk") !== "off" && <a className="site-link" href="https://www.cgtrader.com/designers/jaximus" target="_blank" rel="noopener noreferrer">Desk by Jaximus</a>}
             {isBookOpen(page, pages.length) && <span role="status">{status === "loading" ? "Loading video…" : status === "error" ? "Video unavailable" : status === "placeholder" ? "Star preview" : currentClip.label}</span>}
             <button type="button" aria-label="Previous page" disabled={page === 0} onClick={() => setPage(value => Math.max(0, value - 1))}>← Previous</button>
             <button type="button" aria-label="Next page" disabled={page === pages.length} onClick={() => setPage(value => Math.min(pages.length, value + 1))}>Next →</button>
